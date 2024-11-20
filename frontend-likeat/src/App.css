@@ -1,0 +1,169 @@
+html, body {
+  background-color: #e4e6e8;
+}
+
+/* Main App Styles */
+.App {
+  text-align: center;
+  background-color: #e4e6e8;
+}
+
+/* Auth Form Container Styles */
+.Auth-form-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Auth Form Styles */
+.Auth-form {
+  width: 420px;
+  box-shadow: rgb(0 0 0 / 16%) 1px 1px 10px;
+  padding-top: 30px;
+  padding-bottom: 20px;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.Auth-form-content {
+  padding-left: 12%;
+  padding-right: 12%;
+}
+
+.Auth-form-title {
+  text-align: center;
+  margin-bottom: 1em;
+  font-size: 24px;
+  color: rgb(34, 34, 34);
+  font-weight: 800;
+}
+
+/* content */
+.content {
+  background-color: #e4e6e8;
+  min-height: 750px;
+  padding-bottom: 1rem;
+}
+
+/* footer */
+.footer {
+  background-color: #1a1a1a;
+  color: white;
+  text-align: center;
+  padding: 20px;
+  bottom: 0;
+  width: 100%;
+  margin-top: 50px;
+}
+
+.footer-content {
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+/* close button */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 360px;
+}
+.close-btn-review {
+  position: absolute;
+  top: 25px;
+  right: 250px;
+}
+
+/* admin table */
+.custom-table thead th {
+  border-bottom: none;
+}
+
+.custom-table th
+.custom-table td {
+  border: 1px solid #767879;
+}
+
+/* card hover */
+.card-hover {
+  transition: transform 0.3s ease-in-out;
+}
+.card-hover:hover {
+  transform: scale(1.02);
+}
+
+/* map*/
+.style-field {
+  margin-top: 1rem;
+}
+
+.style-field.with-map {
+  margin-top: 17rem;
+}
+
+.places-picker-map {
+  margin-top: 10px;
+}
+
+/* scroll */
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+}
+
+/* login alert */
+.login-popup {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px 20px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  z-index: 1000;
+  animation: popup 0.3s forwards;
+}
+
+@keyframes popup {
+  to {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+/* filter */
+.custom-container .filter-section {
+  text-align: left;
+}
+.custom-container .filter-section h6 {
+  margin-top: 1rem;
+}
+
+.custom-container .filter-section .form-check {
+  margin-bottom: 0.5rem;
+}
+
+/* propagation */
+.pagination-dark .page-link {
+  background-color: #fff;
+  color: #343a40;
+  border: 1px solid #343a40;
+}
+
+.pagination-dark .page-link:hover {
+  background-color: #495057;
+  color: #fff;
+  border: 1px solid #495057;
+}
+
+.pagination-dark .page-item.active .page-link {
+  background-color: #343a40;
+  border: 1px solid #343a40;
+}
+
+.pagination-dark .page-link:focus {
+  box-shadow: none;
+}

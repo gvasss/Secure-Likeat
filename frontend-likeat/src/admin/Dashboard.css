@@ -1,0 +1,39 @@
+
+.custom-container {
+    max-width: 1600px;
+}
+
+.dashboard-side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.nav-link {
+    padding: 8px 15px;
+    border: 2px solid transparent;
+    color: #333;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+}
+
+.nav-link:hover {
+    color: #a8acaf;
+}
+
+.nav-link.active {
+    background-color: #333;
+    color: #a8acaf;
+    border: 2px solid #333;
+}
+
+.custom-card-header {
+    background-color: #2B2D2E;
+    color: #a8acaf;
+    font-weight: bold;
+    border-bottom: 1px solid #cccccc;
+}
