@@ -1,6 +1,7 @@
 package com.likeat.controller;
 
 import com.likeat.dto.RestaurantDTO;
+import com.likeat.dto.ReviewDTO;
 import com.likeat.exception.RestaurantNotFoundException;
 import com.likeat.exception.UserNotFoundException;
 import com.likeat.model.*;
@@ -10,15 +11,10 @@ import com.likeat.repository.ReviewRepository;
 import com.likeat.repository.PhotoRepository;
 import com.likeat.dto.RestaurantHomeDTO;
 
-import com.likeat.service.BlobDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,12 +60,6 @@ public class RestaurantController {
         return restaurantRepository.findByStatus(status);
     }
 
-    public String convertBlobToString(Blob blob) throws SQLException, UnsupportedEncodingException {
-        int blobLength = (int) blob.length();
-        byte[] blobAsBytes = blob.getBytes(1, blobLength);
-        return new String(blobAsBytes, StandardCharsets.UTF_8);
-    }
-
     @GetMapping("/restaurants/home")
     public List<RestaurantHomeDTO> getAllRestaurantsHome() {
         RestaurantStatus status = RestaurantStatus.ACCEPT;
@@ -92,45 +82,39 @@ public class RestaurantController {
         }).collect(Collectors.toList());
     }
 
-//    @GetMapping("/restaurants/home")
-//    public ResponseEntity<Map<String, Object>> getAllRestaurants(@RequestParam(required = false) String location) {
-//        RestaurantStatus status = RestaurantStatus.ACCEPT;
-//        List<Restaurant> restaurants;
-//
-//        if (location != null && !location.isEmpty()) {
-//            restaurants = restaurantRepository.findByLocationAndStatus(location, status);
-//        } else {
-//            restaurants = restaurantRepository.findByStatus(status);
-//        }
-//
-//        // Sort restaurants based on composite score
-//        restaurants = sortRestaurants(restaurants);
-//
-//        // Gather unique filter values and sort them alphabetically
-//        SortedSet<String> locations = new TreeSet<>();
-//        SortedSet<String> styles = new TreeSet<>();
-//        SortedSet<String> cuisines = new TreeSet<>();
-//        SortedSet<Integer> costs = new TreeSet<>();
-//
-//        for (Restaurant restaurant : restaurants) {
-//            locations.add(restaurant.getLocation());
-//            styles.add(restaurant.getStyle());
-//            cuisines.add(restaurant.getCuisine());
-//            costs.add(restaurant.getCost());
-//        }
-//
-//        // Prepare the response
-//        Map<String, Object> response = new HashMap<>();
-//        response.put("restaurants", restaurants);
-//        response.put("filters", Map.of(
-//                "locations", locations,
-//                "styles", styles,
-//                "cuisines", cuisines,
-//                "costs", costs
-//        ));
-//
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/restaurant/{id}/details")
+    public RestaurantHomeDTO getRestaurantDetails(@PathVariable Long id) {
+        Optional<Restaurant> restaurantDetails = restaurantRepository.findById(id);
+
+        return restaurantDetails.map(restaurant -> {
+            RestaurantHomeDTO dto = new RestaurantHomeDTO();
+            dto.setId(restaurant.getId());
+            List<Photo> photos = photoRepository.findByRestaurantId(restaurant.getId());
+            dto.setPhoto(photos);
+            dto.setName(restaurant.getName());
+            dto.setLocation(restaurant.getLocation());
+            dto.setStyle(restaurant.getStyle());
+            dto.setCuisine(restaurant.getCuisine());
+            dto.setCost(restaurant.getCost());
+            dto.setInformation(restaurant.getInformation());
+            dto.setPhone(restaurant.getPhone());
+            dto.setOpeningHours(restaurant.getOpeningHours());
+            dto.setAddress(restaurant.getAddress());
+            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
+            dto.setReviews(reviews.stream().map(review -> {
+                ReviewDTO reviewDTO = new ReviewDTO();
+                reviewDTO.setRestaurantId(review.getRestaurantId().getId());
+                reviewDTO.setRating(review.getRating());
+                reviewDTO.setDescription(review.getDescription());
+                reviewDTO.setDate(review.getDate());
+                reviewDTO.setCustomerName(review.getCustomerUserId().getName());
+                return reviewDTO;
+            }).collect(Collectors.toList()));
+            dto.setOverallRating(calculateAverageRating(reviews));
+
+            return dto;
+        }).orElseThrow(() -> new RestaurantNotFoundException(id));
+    }
 
     @GetMapping("/restaurant/{id}")
     public Restaurant getRestaurantById(@PathVariable Long id) {
@@ -208,25 +192,6 @@ public class RestaurantController {
     public ResponseEntity<Boolean> checkRestaurantExists(@RequestParam String name, @RequestParam String address) {
         Restaurant restaurant = restaurantRepository.findByNameAndAddress(name, address);
         return ResponseEntity.ok(restaurant != null);
-    }
-
-    private List<Restaurant> sortRestaurants(List<Restaurant> restaurants) {
-        return restaurants.stream()
-                .sorted((a, b) -> {
-                    double aScore = calculateCompositeScore(a);
-                    double bScore = calculateCompositeScore(b);
-                    return Double.compare(bScore, aScore);
-                })
-                .collect(Collectors.toList());
-    }
-
-    private double calculateCompositeScore(Restaurant restaurant) {
-        List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
-        double averageRating = calculateAverageRating(reviews);
-        int reviewCount = reviews.size();
-        double ratingWeight = 0.6;
-        double reviewWeight = 0.4;
-        return (averageRating * ratingWeight) + (reviewCount * reviewWeight);
     }
 
     private double calculateAverageRating(List<Review> reviews) {

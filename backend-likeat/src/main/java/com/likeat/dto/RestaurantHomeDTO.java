@@ -15,7 +15,12 @@ public class RestaurantHomeDTO {
     private String location;
     private String style;
     private String cuisine;
+    private String address;
     private int cost;
     private double overallRating;
     private int totalReviews;
+    private String information;
+    private String phone;
+    private String openingHours;
+    private List<ReviewDTO> reviews;
 }

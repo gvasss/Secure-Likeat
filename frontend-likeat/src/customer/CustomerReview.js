@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Spinner, Card, Container } from 'react-bootstrap';
 import StarRating from '../pages/StarRating';
 
-
 export default function CustomerReview() {
 
   const [reviews, setReviews] = useState([]);
@@ -11,19 +10,19 @@ export default function CustomerReview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const loadCustomerReviews = async () => {
+      try {
+        const result = await axios.get(`http://localhost:8080/customer/${userId}/reviews`);
+        setReviews(result.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("There was an error fetching the reviews!", error);
+        setLoading(false);
+      }
+    };
+
     loadCustomerReviews();
   }, []);
-
-  const loadCustomerReviews = async () => {
-    try {
-      const result = await axios.get(`http://localhost:8080/customer/${userId}/reviews`);
-      setReviews(result.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("There was an error fetching the reviews!", error);
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (

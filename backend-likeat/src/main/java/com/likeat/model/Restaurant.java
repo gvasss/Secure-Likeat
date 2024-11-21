@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 @Entity
 @AllArgsConstructor
@@ -54,5 +55,4 @@ public class Restaurant {
     public Restaurant() {
         this.status = RestaurantStatus.PENDING;
     }
-
 }

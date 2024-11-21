@@ -6,16 +6,8 @@ import StarRating from './StarRating';
 
 export default function Home() {
   const [restaurants, setRestaurants] = useState([]);
-  const [reviewsSummary, setReviewsSummary] = useState({});
-  const [photos, setPhotos] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [selectedFilters, setSelectedFilters] = useState({
-    locations: [],
-    styles: [],
-    cuisines: [],
-    costs: []
-  });
   const navigate = useNavigate();
   const userRole = localStorage.getItem('userRole') || '';
   const [showLoginPopup, setShowLoginPopup] = useState(false);
@@ -47,13 +39,9 @@ export default function Home() {
     }
   };
 
-  const filteredRestaurants = () =>restaurants.filter((restaurant) => {
+  const filteredRestaurants = restaurants.filter((restaurant) => {
     const nameMatch = restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const locationMatch = selectedFilters.locations.length === 0 || selectedFilters.locations.includes(restaurant.location);
-    const styleMatch = selectedFilters.styles.length === 0 || selectedFilters.styles.includes(restaurant.style);
-    const cuisineMatch = selectedFilters.cuisines.length === 0 || selectedFilters.cuisines.includes(restaurant.cuisine);
-    const costMatch = selectedFilters.costs.length === 0 || selectedFilters.costs.includes(restaurant.cost);
-    return nameMatch && locationMatch && styleMatch && cuisineMatch && costMatch;
+    return nameMatch;
   });
 
   const handleSearch = (e) => {
@@ -69,7 +57,7 @@ export default function Home() {
       return 'https://cdn.otstatic.com/legacy-cw/default2-original.png';
     }
     const restaurantPhotos = restaurant.photo[0].image;
-    if (!restaurantPhotos || restaurantPhotos.length === 0) {
+    if (!restaurantPhotos) {
       return 'https://cdn.otstatic.com/legacy-cw/default2-original.png';
     }
     if (restaurantPhotos) {
@@ -98,7 +86,7 @@ export default function Home() {
 
           </Form>
             <Row xs={1} md={4} className="g-4">
-              {Array.isArray(restaurants) && restaurants.map((restaurant) => (
+              {filteredRestaurants.map((restaurant) => (
                 <Col key={restaurant.id}>
                   <Card className="card-hover" onClick={() => handleRestaurantClick(restaurant.id)} style={{ cursor: 'pointer' }}>
                     <Card.Img

@@ -14,4 +14,5 @@ public class ReviewDTO {
     private Date date;
     private Long customerUserId;
     private Long restaurantId;
+    private String customerName;
 }
