@@ -24,47 +24,10 @@ export default function RestaurantDetail() {
       }
     };
 
-    // const loadReviews = async () => {
-    //   try {
-    //     const result = await axios.get(`http://localhost:8080/restaurant/${id}/reviews`);
-    //     const fetchedReviews = result.data;
-
-    //     const customerReviewPromises = fetchedReviews.map(review => 
-    //       axios.get(`http://localhost:8080/customer/${review.customerUserId.id}/reviews`)
-    //     );
-    //     const customerReviewsResults = await Promise.all(customerReviewPromises);
-    //     const reviewCounts = {};
-    //     customerReviewsResults.forEach((customerReviews, index) => {
-    //       reviewCounts[fetchedReviews[index].customerUserId.id] = customerReviews.data.length;
-    //     });
-
-    //     setReviews(fetchedReviews);
-    //     setCustomerReviewCounts(reviewCounts);
-    //     setLoading(false);
-    //   } catch (error) {
-    //     console.error("There was an error fetching the reviews!", error);
-    //     setLoading(false);
-    //   }
-    // };
-
-    // const loadPhotos = async () => {
-    //   try {
-    //     const result = await axios.get(`http://localhost:8080/photos/restaurant/${id}`);
-    //     console.log("Fetched photos:", result.data);
-    //     setPhotos(result.data);
-    //     setLoading(false);
-    //   } catch (error) {
-    //     console.error("There was an error fetching the photos!", error);
-    //     setLoading(false);
-    //   }
-    // };
-
     const userRole = localStorage.getItem('userRole');
     setUserRole(userRole);
 
     loadRestaurant();
-    // loadReviews();
-    // loadPhotos();
   }, [id]);
 
   const handleSelect = (selectedIndex) => {
@@ -81,25 +44,10 @@ export default function RestaurantDetail() {
     );
   }
 
-  // const calculateAverageRating = () => {
-  //   if (reviews.length === 0) return 0;
-  //   const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-  //   return (totalRating / reviews.length).toFixed(1);
-  // };
-
   const generateGoogleMapsEmbedUrl = (address) => {
     const encodedAddress = encodeURIComponent(address);
     return `https://www.google.com/maps/embed/v1/place?key=AIzaSyAG-SZyG6mMrfhGHJPcc1y8mCFCYd3FWpU&q=${encodedAddress}`;
   };
-
-  // const getMainPhoto = (photos) => {
-  //   if (!photos || photos.length === 0) return 'default-image-url';
-  //   const mainPhoto = photos.find(photo => photo.isMain);
-  //   if (mainPhoto) {
-  //     return `data:image/jpeg;base64,${mainPhoto.image}`;
-  //   }
-  //   return 'default-image-url';
-  // };
 
   if (loading) {
     return (
@@ -177,9 +125,6 @@ export default function RestaurantDetail() {
               <Col sm={1}>
                   <i className="fas fa-user-circle fa-2x"></i>
                   <div className="reviewer-name">{review.customerName}</div>
-                  {/* <div className="reviewer-review-count">
-                    {customerReviewCounts[review.customerUserId.id] || 0} Reviews
-                  </div> */}
                 </Col>
                 <Col sm={10}>
                   <StarRating rating={review.rating} />
