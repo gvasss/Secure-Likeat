@@ -1,66 +1,32 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Carousel, Container, Card, CloseButton } from 'react-bootstrap';
+import { Carousel, Container, Card, CloseButton, Spinner } from 'react-bootstrap';
 
 export default function ViewRestaurant() {
 
   const { id } = useParams();
-  const [reviews, setReviews] = useState([]);
-  const [previousImages, setPreviousImages] = useState([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const userRole = localStorage.getItem('userRole');
-
-  const [restaurant, setRestaurant] = useState({
-    id: "",
-    clientUserId: "",
-    name: "",
-    address: "",
-    style: "",
-    cuisine: "",
-    cost: "",
-    information: "",
-    phone: "",
-    openingHours: "",
-    overallRating: "",
-    reviews: "",
-    location: "",
-  });
+  const [restaurant, setRestaurant] = useState(null);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [userRole, setUserRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const loadRestaurant = async () => {
+      try {
+        const result = await axios.get(`http://localhost:8080/restaurant/${id}/details`);
+        setRestaurant(result.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("There was an error fetching the restaurant details!", error);
+        setLoading(false);
+      }
+    };
+
+    const userRole = localStorage.getItem('userRole');
+    setUserRole(userRole);
     loadRestaurant();
-    loadReviews();
-    loadImages();
-  }, []);
-
-  const loadRestaurant = async () => {
-    const result = await axios.get(`http://localhost:8080/restaurant/${id}`);
-    setRestaurant(result.data);
-  };
-
-  const loadReviews = async () => {
-    try {
-      const result = await axios.get(`http://localhost:8080/restaurant/${id}/reviews`);
-      setReviews(result.data);
-    } catch (error) {
-      console.error("There was an error fetching the reviews!", error);
-    }
-  };
-
-  const loadImages = async () => {
-    try {
-      const result = await axios.get(`http://localhost:8080/photos/restaurant/${id}`);
-      setPreviousImages(result.data);
-    } catch (error) {
-      console.error("Error loading images", error);
-    }
-  };
-
-  const calculateAverageRating = () => {
-    if (reviews.length === 0) return 0;
-    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return (totalRating / reviews.length).toFixed(1);
-  };
+  }, [id]);
 
   const imageStyle = {
     width: '100%',
@@ -69,9 +35,19 @@ export default function ViewRestaurant() {
     backgroundColor: '#e4e6e8',
   };
 
-  const handleSelect = (selectedIndex) => {
-    setCurrentImageIndex(selectedIndex);
+  const handleSelect = (carouselIndex) => {
+    setCarouselIndex(carouselIndex);
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <Container className="py-4 position-relative">
@@ -90,7 +66,7 @@ export default function ViewRestaurant() {
                 </>
               )}
               <li className="list-group-item">
-                <b>Client: </b>{restaurant.clientUserId.username}
+                <b>Client: </b>{restaurant.clientName}
               </li>
               <li className="list-group-item">
                 <b>Name: </b>{restaurant.name}
@@ -117,10 +93,10 @@ export default function ViewRestaurant() {
                 <b>Opening Hours: </b>{restaurant.openingHours}
               </li>
               <li className="list-group-item">
-                <b>Overall Rating: </b>{calculateAverageRating()}
+                <b>Overall Rating: </b>{restaurant.overallRating}
               </li>
               <li className="list-group-item">
-                <b>Reviews: </b>{reviews.length}
+                <b>Reviews: </b>{restaurant.totalReviews}
               </li>
               <li className="list-group-item">
                 <b>Location: </b>{restaurant.location}
@@ -130,23 +106,25 @@ export default function ViewRestaurant() {
         </Card>
 
         <div style={{ marginTop: '20px' }}>
-          <h5>{previousImages[currentImageIndex]?.isMain ? "Main Image" : "Additional Images"}</h5>
-          {previousImages.length > 0 ? (
-            <Carousel activeIndex={currentImageIndex} onSelect={handleSelect} data-bs-theme="dark" className="mb-3">
-              {previousImages.map((image, index) => (
-                <Carousel.Item key={index}>
-                  <img
-                    className="d-block w-100"
-                    src={`data:image/jpeg;base64,${image.image}`}
-                    alt={`Image ${index}`}
-                    style={imageStyle}
-                  />
-                </Carousel.Item>
-              ))}
-            </Carousel>
+          {restaurant.photo.length > 0 ? (
+            <>
+              <h5>{restaurant.photo[carouselIndex]?.isMain ? "Main Image" : "Additional Image"}</h5>
+              <Carousel activeIndex={carouselIndex} onSelect={handleSelect} data-bs-theme="dark">
+                {restaurant.photo.map((photo, index) => (
+                  <Carousel.Item key={index}>
+                    <img
+                      className="d-block w-100 carousel-image"
+                      src={`data:image/jpeg;base64,${photo.image}`}
+                      alt={restaurant.name}
+                      style={imageStyle}
+                    />
+                  </Carousel.Item>
+                ))}
+              </Carousel>
+            </>
           ) : (
             <div className="alert alert-warning" role="alert">
-              <p>No images available</p>
+              <p>No photos available</p>
             </div>
           )}
         </div>

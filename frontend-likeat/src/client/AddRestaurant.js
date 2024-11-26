@@ -2,17 +2,13 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Container } from 'react-bootstrap';
-import PlacesPicker from '@tasiodev/react-places-autocomplete';
 
 export default function AddRestaurant() {
   const [mainImage, setMainImage] = useState(null);
   const [additionalImages, setAdditionalImages] = useState([]);
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState(null);
-  const [addressError, setAddressError] = useState(false);
   let navigate = useNavigate();
-  const [value, setValue] = useState(null);
-  const [formattedAddress, setFormattedAddress] = useState('');
 
   const [restaurant, setRestaurant] = useState({
     clientUserId: Number(localStorage.getItem('userId')),
@@ -37,7 +33,7 @@ export default function AddRestaurant() {
     }
   }, []);
 
-  const { clientUserId, name, style, cuisine, cost, information, phone, openingHours, location } = restaurant;
+  const { clientUserId, name, address, style, cuisine, cost, information, phone, openingHours, location } = restaurant;
 
   const onInputChange = (e) => {
     setRestaurant({ ...restaurant, [e.target.name]: e.target.value });
@@ -52,56 +48,16 @@ export default function AddRestaurant() {
   };
 
   const onSubmit = async (e) => {
-    const form = e.currentTarget;
     e.preventDefault();
-    if (form.checkValidity() === false || !value) {
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
-      setAddressError(!value);
       return;
     }
 
     try {
-      // Geocode placeId to get formatted address
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ placeId: value }, (results, status) => {
-        if (status === 'OK') {
-          if (results[0]) {
-            const formattedAddress = results[0].formatted_address;
-            setFormattedAddress(formattedAddress);
-
-            createRestaurant(formattedAddress);
-          } else {
-            throw new Error('No results found for this place ID');
-          }
-        } else {
-          throw new Error(`Geocode failed due to: ${status}`);
-        }
-      });
-    } catch (error) {
-      console.error('Error submitting the form', error.message);
-      setError(error.message);
-    }
-  };
-
-  const createRestaurant = async (formattedAddress) => {
-    try {
-      // Check if restaurant name and address already exist
-      const checkResponse = await axios.get(`http://localhost:8080/checkRestaurant`, {
-        params: {
-          name: restaurant.name,
-          address: formattedAddress,
-        },
-      });
-
-      if (checkResponse.data) {
-        throw new Error('A restaurant with this name and address already exists');
-      }
-
-      const restaurantResponse = await axios.post('http://localhost:8080/restaurant', {
-        ...restaurant,
-        address: formattedAddress,
-      });
+      const restaurantResponse = await axios.post('http://localhost:8080/restaurant', restaurant);
 
       const restaurantId = restaurantResponse.data.id;
 
@@ -112,7 +68,7 @@ export default function AddRestaurant() {
         formData.append('additionalImage', image, `additionalImage${index}.jpg`);
       });
 
-      const imageResponse = await axios.post(`http://localhost:8080/photos/restaurant/${restaurantId}`, formData, {
+      await axios.post(`http://localhost:8080/photos/restaurant/${restaurantId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -157,19 +113,21 @@ export default function AddRestaurant() {
               Please enter a name.
             </Form.Control.Feedback>
           </Form.Floating>
-          <Form.Group className="mb-3">
-            <PlacesPicker
-              gMapsKey='AIzaSyAG-SZyG6mMrfhGHJPcc1y8mCFCYd3FWpU'
-              placeId={value}
-              onChange={setValue}
-              placeholder='Search for an address'
+          <Form.Floating className="mb-3">
+            <Form.Control
+              id="floatingAddress"
+              type="text"
+              placeholder="Enter the restaurant address"
+              name="address"
+              value={address}
+              onChange={onInputChange}
+              required
             />
-            {addressError && (
-              <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
-                Please enter an address.
-              </Form.Control.Feedback>
-            )}
-          </Form.Group>
+            <label htmlFor="floatingAddress">Address</label>
+            <Form.Control.Feedback type="invalid">
+              Please enter an address.
+            </Form.Control.Feedback>
+          </Form.Floating>
           <Form.Floating className="mb-3">
             <Form.Control
               id="floatingStyle"

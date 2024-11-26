@@ -26,7 +26,6 @@ export default function RestaurantDetail() {
 
     const userRole = localStorage.getItem('userRole');
     setUserRole(userRole);
-
     loadRestaurant();
   }, [id]);
 
@@ -44,6 +43,7 @@ export default function RestaurantDetail() {
     );
   }
 
+  //const key = process.env.API_KEY;
   const generateGoogleMapsEmbedUrl = (address) => {
     const encodedAddress = encodeURIComponent(address);
     return `https://www.google.com/maps/embed/v1/place?key=AIzaSyAG-SZyG6mMrfhGHJPcc1y8mCFCYd3FWpU&q=${encodedAddress}`;
@@ -81,6 +81,7 @@ export default function RestaurantDetail() {
                 <img
                   className="d-block w-100 carousel-image"
                   src={`data:image/jpeg;base64,${photo.image}`}
+                  alt={restaurant.name}
                 />
               </Carousel.Item>
             ))}
@@ -94,7 +95,7 @@ export default function RestaurantDetail() {
 
       <h3 className="mb-4">Information</h3>
       <Card className="text-center mx-auto mb-4" border="dark">
-      <Card.Body>
+        <Card.Body>
           <Card.Text><i className="fas fa-info-circle"></i> {restaurant.information}</Card.Text>
           <Card.Text><i className="fas fa-map-marker-alt"></i> <strong>Address:</strong> {restaurant.address}</Card.Text>
           <Card.Text><i className="fas fa-clock"></i> <strong>Opening hours:</strong> {restaurant.openingHours}</Card.Text>
@@ -107,6 +108,7 @@ export default function RestaurantDetail() {
       <ListGroup.Item className="mb-4">
         <div style={{ height: '400px', width: '100%' }}>
           <iframe
+            title={`Map of ${restaurant.name}`}
             width="100%"
             height="100%"
             style={{ border: 0 }}
