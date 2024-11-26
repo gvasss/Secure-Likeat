@@ -23,4 +23,5 @@ public class RestaurantHomeDTO {
     private String phone;
     private String openingHours;
     private List<ReviewDTO> reviews;
+    private String clientName;
 }

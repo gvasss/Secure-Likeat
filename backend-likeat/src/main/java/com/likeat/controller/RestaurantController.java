@@ -100,6 +100,7 @@ public class RestaurantController {
             dto.setPhone(restaurant.getPhone());
             dto.setOpeningHours(restaurant.getOpeningHours());
             dto.setAddress(restaurant.getAddress());
+            dto.setClientName(restaurant.getClientUserId().getName());
             List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
             dto.setReviews(reviews.stream().map(review -> {
                 ReviewDTO reviewDTO = new ReviewDTO();
@@ -111,6 +112,7 @@ public class RestaurantController {
                 return reviewDTO;
             }).collect(Collectors.toList()));
             dto.setOverallRating(calculateAverageRating(reviews));
+            dto.setTotalReviews(reviews.size());
 
             return dto;
         }).orElseThrow(() -> new RestaurantNotFoundException(id));
