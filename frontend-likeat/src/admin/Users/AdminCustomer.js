@@ -6,7 +6,6 @@ import { Container, Row, Col, Form, Table, Button, Spinner, Pagination } from 'r
 export default function AdminCustomer() {
 
   const [customers, setCustomers] = useState([]);
-  const [reviews, setReviews] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,21 +21,8 @@ export default function AdminCustomer() {
 
   const loadCustomers = async () => {
     try {
-      const result = await axios.get("http://localhost:8080/customers");
-      const fetchedCustomers = result.data;
-      setCustomers(fetchedCustomers);
-
-      // Fetch reviews for each customer
-      const reviewsPromises = fetchedCustomers.map(customer =>
-        axios.get(`http://localhost:8080/customer/${customer.id}/reviews`)
-      );
-      const reviewsResults = await Promise.all(reviewsPromises);
-      const reviewsData = {};
-      reviewsResults.forEach((reviewResult, index) => {
-        reviewsData[fetchedCustomers[index].id] = reviewResult.data;
-      });
-      setReviews(reviewsData);
-
+      const result = await axios.get("http://localhost:8080/admin/customers");
+      setCustomers(result.data);
       setLoading(false);
     } catch (error) {
       console.error("There was an error fetching the customers!", error);
@@ -47,7 +33,7 @@ export default function AdminCustomer() {
   const deleteCustomer = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/customer/${id}`);
-      loadCustomers();
+      setCustomers((customers) => customers.filter(customer => customer.id !== id));
     } catch (error) {
       console.error("There was an error deleting the customer!", error);
     }
@@ -120,7 +106,7 @@ export default function AdminCustomer() {
                   <td>{customer.surname}</td>
                   <td>{customer.username}</td>
                   <td>{customer.email}</td>
-                  <td>{reviews[customer.id] ? reviews[customer.id].length : 0}</td>
+                  <td>{customer.totalReviews}</td>
                   <td>{customer.location}</td>
                   <td>
                     <Link className="btn btn-dark mx-2" to={`/viewuser/${customer.id}`}>

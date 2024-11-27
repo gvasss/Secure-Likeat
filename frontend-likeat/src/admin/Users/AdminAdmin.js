@@ -31,8 +31,13 @@ export default function AdminAdmin() {
   };
 
   const deleteAdmin = async (id) => {
-    await axios.delete(`http://localhost:8080/admin/${id}`);
     loadAdmins();
+    try {
+      await axios.delete(`http://localhost:8080/admin/${id}`);
+      setAdmins((admins) => admins.filter(admin => admin.id !== id));
+    } catch (error) {
+      console.error("There was an error deleting the admin!", error);
+    }
   };
 
   // Search

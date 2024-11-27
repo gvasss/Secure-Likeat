@@ -17,14 +17,14 @@ export default function ViewReview() {
     const {id} = useParams();
 
     useEffect(() => {
-      loadReview()
-    }, []);
- 
-    const loadReview = async () => {
-      const result = await axios.get (`http://localhost:8080/review/${id}`)
-      setReview(result.data)
-    };
+      const loadReview = async () => {
+        const result = await axios.get (`http://localhost:8080/review/${id}`)
+        setReview(result.data)
+      };
 
+      loadReview()
+    },[id]);
+ 
   return (
     <Container className="py-4 position-relative">
       <CloseButton variant="dark" className="close-btn" onClick={() => window.history.back()} aria-label="Close" />

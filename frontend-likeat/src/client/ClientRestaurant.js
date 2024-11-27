@@ -34,7 +34,7 @@ export default function ClientRestaurant() {
   const deleteRestaurant = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/restaurant/${id}`);
-      setRestaurants(restaurants.filter(restaurant => restaurant.id !== id));
+      setRestaurants((restaurants) => restaurants.filter(restaurant => restaurant.id !== id));
       setShowModal(false);
     } catch (error) {
       console.error("There was an error deleting the restaurant!", error);

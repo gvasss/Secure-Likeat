@@ -1,70 +1,29 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { CloseButton, Container, Card } from 'react-bootstrap';
+import { CloseButton, Container, Card, Spinner } from 'react-bootstrap';
 
 export default function ViewUser() {
 
   const { id } = useParams();
-  const [error, setError] = useState(null);
-  const [reviewCount, setReviewCount] = useState(0);
+  const [user, setUser] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [user, setUser] = useState({
-    id: "",
-    username: "",
-    name: "",
-    surname: "",
-    email: "",
-    role: "",
-    reviews: "",
-    location: "",
-  });
 
   useEffect(() => {
-    loadUser();
-  }, []);
-
-  const loadUser = async () => {
-    try {
-      const result = await axios.get(`http://localhost:8080/user/${id}`);
-      const userRole = result.data.role;
-      await loadUserDetails(userRole);
-    } catch (err) {
-      setError('Failed to load user role.');
-      console.error(err);
-    }
-  };
-
-  const loadUserDetails = async (role) => {
-    try {
-      const endpoint = getEndpoint(role, id);
-      const result = await axios.get(endpoint);
-      setUser(result.data);
-
-      if (role === 'customer') {
-        const reviewsResult = await axios.get(`http://localhost:8080/customer/${id}/reviews`);
-        setReviewCount(reviewsResult.data.length);
+    const loadUser = async () => {
+      try {
+        const result = await axios.get(`http://localhost:8080/user/${id}/details`);
+        setUser(result.data);
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
       }
-    } catch (err) {
-      setError('Failed to load user details.');
-      console.error(err);
-    }
-  };
+    };
 
-  const getEndpoint = (role, id) => {
-    switch (role) {
-      case 'admin':
-        return `http://localhost:8080/admin/${id}`;
-      case 'client':
-        return `http://localhost:8080/client/${id}`;
-      case 'customer':
-        return `http://localhost:8080/customer/${id}`;
-      default:
-        throw new Error('Unknown user role');
-    }
-  };
-
-  if (error) return <p>{error}</p>;
+    loadUser();
+  }, [id]);
 
   const getIconClass = (role) => {
     switch (role) {
@@ -78,6 +37,16 @@ export default function ViewUser() {
         return 'fas fa-question-circle fa-3x';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <Container className="py-4 position-relative">
@@ -112,7 +81,7 @@ export default function ViewUser() {
                     <b>Location: </b> {user.location}
                   </li>
                   <li className='list-group-item'>
-                    <b>Reviews: </b> {reviewCount}
+                    <b>Reviews: </b> {user.totalReviews}
                   </li>
                 </>
               )}

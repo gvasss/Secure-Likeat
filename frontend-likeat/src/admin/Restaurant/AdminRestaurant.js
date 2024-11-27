@@ -6,7 +6,6 @@ import { Container, Row, Col, Form, Table, Button, Spinner, Pagination } from 'r
 export default function AdminRestaurant() {
 
   const [restaurants, setRestaurants] = useState([]);
-  const [reviews, setReviews] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,20 +21,8 @@ export default function AdminRestaurant() {
 
   const loadRestaurants = async () => {
     try {
-      const result = await axios.get("http://localhost:8080/restaurants");
-      const fetchedRestaurants = result.data;
-      setRestaurants(fetchedRestaurants);
-
-      // Fetch reviews for each restaurant
-      const reviewsPromises = fetchedRestaurants.map(restaurant =>
-        axios.get(`http://localhost:8080/restaurant/${restaurant.id}/reviews`)
-      );
-      const reviewsResults = await Promise.all(reviewsPromises);
-      const reviewsData = {};
-      reviewsResults.forEach((reviewResult, index) => {
-        reviewsData[fetchedRestaurants[index].id] = reviewResult.data;
-      });
-      setReviews(reviewsData);
+      const result = await axios.get("http://localhost:8080/admin/restaurants");
+      setRestaurants(result.data);
       setLoading(false);
     } catch (error) {
       console.error("There was an error fetching the restaurants!", error);
@@ -46,16 +33,10 @@ export default function AdminRestaurant() {
   const deleteRestaurant = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/restaurant/${id}`);
-      setRestaurants(restaurants.filter(restaurant => restaurant.id !== id));
+      setRestaurants((restaurants) => restaurants.filter(restaurant => restaurant.id !== id));
     } catch (error) {
       console.error("There was an error deleting the restaurant!", error);
     }
-  };
-
-  const calculateAverageRating = (reviews) => {
-    if (!reviews || reviews.length === 0) return 0;
-    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return (totalRating / reviews.length).toFixed(1);
   };
 
   // Search
@@ -126,13 +107,13 @@ export default function AdminRestaurant() {
                 <tr key={restaurant.id}>
                   <td>{indexOfFirstRestaurant + index + 1}</td>
                   <td>{restaurant.id}</td>
-                  <td>{restaurant.clientUserId ? restaurant.clientUserId.username : 'N/A'}</td>
+                  <td>{restaurant.clientName}</td>
                   <td>{restaurant.name}</td>
                   <td>{restaurant.style}</td>
                   <td>{restaurant.location}</td>
                   <td>{restaurant.cost}</td>
-                  <td>{reviews[restaurant.id] ? reviews[restaurant.id].length : 0}</td>
-                  <td>{calculateAverageRating(reviews[restaurant.id])}</td>
+                  <td>{restaurant.totalReviews}</td>
+                  <td>{restaurant.overallRating}</td>
                   <td>
                     <Link className="btn btn-dark mx-2" to={`/viewrestaurant/${restaurant.id}`}>
                       <i className="fas fa-eye"></i> View

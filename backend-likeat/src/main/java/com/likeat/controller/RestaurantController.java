@@ -78,6 +78,7 @@ public class RestaurantController {
             List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
             dto.setOverallRating(calculateAverageRating(reviews));
             dto.setTotalReviews(reviews.size());
+
             return dto;
         }).collect(Collectors.toList());
     }

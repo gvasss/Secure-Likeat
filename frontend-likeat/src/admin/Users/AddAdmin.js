@@ -1,11 +1,9 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button, Container, Form } from 'react-bootstrap';
 
 export default function AddAdmin() {
 
-  let navigate = useNavigate();
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState(null);
 
@@ -44,7 +42,6 @@ export default function AddAdmin() {
         throw new Error('Failed to check username availability');
       }
       const isUsernameExists = await usernameResponse.json();
-
       if (isUsernameExists) {
         setError('Username already exists.');
         return;
@@ -56,14 +53,12 @@ export default function AddAdmin() {
         throw new Error('Failed to check email availability');
       }
       const isEmailExists = await emailResponse.json();
-
       if (isEmailExists) {
         setError('Email already exists.');
         return;
       }
 
-      const response = await axios.post('http://localhost:8080/admin', admin);
-
+      await axios.post('http://localhost:8080/admin', admin);
     
       window.history.back()
     } catch (error) {

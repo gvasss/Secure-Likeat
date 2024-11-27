@@ -12,7 +12,7 @@ export default function EditRestaurant() {
     const [validated, setValidated] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [phoneError, setPhoneError] = useState("");
+    //const [phoneError, setPhoneError] = useState("");
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     let navigate = useNavigate();
 
@@ -29,7 +29,7 @@ export default function EditRestaurant() {
         location: "",
     });
 
-    const { clientUserId, name, address, style, cuisine, cost, information, phone, openingHours, location } = restaurant;
+    const { name, address, style, cuisine, cost, information, phone, openingHours, location } = restaurant;
 
     const loadRestaurant = async () => {
         try {
@@ -67,10 +67,10 @@ export default function EditRestaurant() {
             return;
         }
 
-        if (!validatePhoneNumber(phone)) {
-            setError("Please enter a valid phone number.");
-            return;
-        }
+        // if (!validatePhoneNumber(phone)) {
+        //     setError("Please enter a valid phone number.");
+        //     return;
+        // }
 
         try {
             await axios.put(`http://localhost:8080/restaurant/${id}`, restaurant);
@@ -92,10 +92,10 @@ export default function EditRestaurant() {
       }
     };
 
-    const validatePhoneNumber = (phoneNumber) => {
-        const phonePattern = /^[2-9]\d{2}\d{3}\d{4}$/;
-        return phonePattern.test(phoneNumber);
-    };
+    // const validatePhoneNumber = (phoneNumber) => {
+    //     const phonePattern = /^[2-9]\d{2}\d{3}\d{4}$/;
+    //     return phonePattern.test(phoneNumber);
+    // };
 
     const onInputChange = (e) => {
         setRestaurant({ ...restaurant, [e.target.name]: e.target.value });
@@ -298,7 +298,7 @@ export default function EditRestaurant() {
                                         <img
                                             className="d-block w-100"
                                             src={`data:image/jpeg;base64,${image.image}`}
-                                            alt={`Image ${index}`}
+                                            alt={restaurant.name}
                                             style={imageStyle}
                                         />
                                         <Carousel.Caption>

@@ -1,8 +1,14 @@
 package com.likeat.controller;
 
+import com.likeat.dto.RestaurantHomeDTO;
+import com.likeat.dto.ReviewDTO;
+import com.likeat.dto.UserDTO;
+import com.likeat.exception.RestaurantNotFoundException;
 import com.likeat.exception.UserNotFoundException;
 import com.likeat.dto.LoginDTO;
-import com.likeat.model.User;
+import com.likeat.model.*;
+import com.likeat.repository.CustomerRepository;
+import com.likeat.repository.ReviewRepository;
 import com.likeat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin("http://localhost:3000")
@@ -18,6 +26,12 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     @PostMapping("/user")
     User newUser(@RequestBody User newUser) {
@@ -98,5 +112,28 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok("Password updated successfully");
+    }
+
+    @GetMapping("/user/{id}/details")
+    public UserDTO getUser(@PathVariable Long id) {
+        Optional<User> userDetails =  userRepository.findById(id);
+
+        return userDetails.map(user -> {
+            UserDTO dto = new UserDTO();
+            dto.setId(user.getId());
+            dto.setRole(user.getRole());
+            dto.setUsername(user.getUsername());
+            dto.setName(user.getName());
+            dto.setSurname(user.getSurname());
+            dto.setEmail(user.getEmail());
+            Customer customer = customerRepository.findById(user.getId()).orElse(null);
+            if (customer != null) {
+                dto.setLocation(customer.getLocation());
+                List<Review> reviews = reviewRepository.findByCustomerUserId(customer);
+                dto.setTotalReviews(reviews.size());
+            }
+
+            return dto;
+        }).orElseThrow(() -> new UserNotFoundException(id));
     }
 }

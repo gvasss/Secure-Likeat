@@ -20,7 +20,7 @@ export default function AdminReview() {
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      }, [currentPage]);
+    }, [currentPage]);
 
     const loadReviews = async () => {
         try {
@@ -36,7 +36,7 @@ export default function AdminReview() {
     const deleteReview = async (id) => {
         try {
             await axios.delete(`http://localhost:8080/review/${id}`);
-            setReviews(reviews.filter(review => review.id !== id));
+            setReviews((reviews) => reviews.filter(review => review.id !== id));
         } catch (error) {
             console.error("There was an error deleting the review!", error);
         }
