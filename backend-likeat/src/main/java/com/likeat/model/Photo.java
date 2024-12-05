@@ -1,10 +1,10 @@
 package com.likeat.model;
 
-import com.likeat.service.BlobDeserializer;
-import com.likeat.service.BlobSerializer;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.likeat.service.BlobDeserializer;
+import com.likeat.service.BlobSerializer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,7 +18,7 @@ import java.sql.Blob;
 public class Photo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private Long id;
 
     @ManyToOne
@@ -40,5 +40,4 @@ public class Photo {
     public void setMain(boolean isMain) {
         this.isMain = isMain;
     }
-
 }

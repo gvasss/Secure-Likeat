@@ -1,13 +1,15 @@
 package com.likeat.controller;
+
 import com.likeat.dto.ReviewDTO;
 import com.likeat.exception.ReviewNotFoundException;
 import com.likeat.exception.UserNotFoundException;
-import com.likeat.model.Customer;
 import com.likeat.model.Restaurant;
 import com.likeat.model.Review;
+import com.likeat.model.User;
 import com.likeat.repository.ReviewRepository;
-import com.likeat.repository.CustomerRepository;
 import com.likeat.repository.RestaurantRepository;
+import com.likeat.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,21 +18,22 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@RequestMapping("/likeat/reviews")
+@RequiredArgsConstructor
 public class ReviewController {
 
     @Autowired
     private ReviewRepository reviewRepository;
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private RestaurantRepository restaurantRepository;
 
     @PostMapping("/review")
     public Review newReview(@RequestBody ReviewDTO reviewDTO) {
-        Customer customer = customerRepository.findById(reviewDTO.getCustomerUserId())
+        User customer = userRepository.findById(reviewDTO.getCustomerUserId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         // Convert restaurantId to Restaurant object

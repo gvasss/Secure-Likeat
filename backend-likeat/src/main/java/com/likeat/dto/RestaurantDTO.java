@@ -18,5 +18,5 @@ public class RestaurantDTO {
     private String phone;
     private String openingHours;
     private String location;
-    private RestaurantStatus status;
+    private String status;
 }

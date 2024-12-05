@@ -4,23 +4,25 @@ import com.likeat.dto.RestaurantHomeDTO;
 import com.likeat.dto.UserDTO;
 import com.likeat.exception.UserNotFoundException;
 import com.likeat.model.*;
-import com.likeat.repository.AdminRepository;
-import com.likeat.repository.CustomerRepository;
 import com.likeat.repository.RestaurantRepository;
 import com.likeat.repository.ReviewRepository;
+import com.likeat.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Scanner;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@RequestMapping("/likeat/users/admins")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     @Autowired
-    private AdminRepository adminRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private RestaurantRepository restaurantRepository;
@@ -28,49 +30,51 @@ public class AdminController {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
     // admin
-    @PostMapping("/admin")
-    Admin newAdmin(@RequestBody Admin newAdmin) {
-        return adminRepository.save(newAdmin);
+    @GetMapping("/")
+    @PreAuthorize("hasAuthority('admin:read')")
+    public Optional<User> getAllAdmins() {
+        return userRepository.findAllByRole(Role.ADMIN);
     }
 
-    @GetMapping("/admins")
-    List<Admin> getAllAdmins() {
-        return adminRepository.findAll();
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin:read')")
+    public UserDTO getUser(@PathVariable Long id) {
+        Optional<User> userDetails =  userRepository.findById(id);
+
+        return userDetails.map(user -> {
+            UserDTO dto = new UserDTO();
+            dto.setId(user.getId());
+            dto.setRole(user.getRole().toString());
+            dto.setUsername(user.getUsername());
+            dto.setName(user.getName());
+            dto.setSurname(user.getSurname());
+            dto.setEmail(user.getEmail());
+
+            return dto;
+        }).orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    @GetMapping("/admin/{user_id}")
-    Admin getAdminById(@PathVariable Long user_id) {
-        return adminRepository.findById(user_id)
-                .orElseThrow(()->new UserNotFoundException(user_id));
-    }
-
-    @PutMapping("/admin/{user_id}")
-    Admin getUpdatedAdmin(@PathVariable Long user_id, @RequestBody Admin updatedAdmin) {
-        return adminRepository.findById(user_id)
-                .map(Admin -> {
-                    Admin.setUsername(updatedAdmin.getUsername());
-                    Admin.setName(updatedAdmin.getName());
-                    Admin.setSurname(updatedAdmin.getSurname());
-                    Admin.setEmail(updatedAdmin.getEmail());
-                    return adminRepository.save(Admin);
-                }).orElseThrow(()->new UserNotFoundException(user_id));
-    }
-
-    @DeleteMapping("/admin/{user_id}/delete")
-    String deleteAdmin(@PathVariable Long user_id) {
-        if (!adminRepository.existsById(user_id)) {
-            throw new UserNotFoundException(user_id);
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('admin:delete')")
+    String deleteUser(@PathVariable Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException(id);
         }
-        adminRepository.deleteById(user_id);
-        return "Admin with id " + user_id + " deleted.";
+        userRepository.deleteById(id);
+        return "User with id " + id + " deleted.";
+    }
+
+    // client
+    @GetMapping("/clients")
+    @PreAuthorize("hasAuthority('client:read')")
+    public Optional<User> getAllClients() {
+        return userRepository.findAllByRole(Role.CLIENT);
     }
 
     // restaurant
-    @GetMapping("/admin/restaurants")
+    @GetMapping("/restaurants")
+    @PreAuthorize("hasAuthority('restaurant:read')")
     public List<RestaurantHomeDTO> getRestaurantDetailsAdmin() {
         RestaurantStatus status = RestaurantStatus.ACCEPT;
         List<Restaurant> restaurants = restaurantRepository.findByStatus(status);
@@ -79,7 +83,7 @@ public class AdminController {
             RestaurantHomeDTO dto = new RestaurantHomeDTO();
             dto.setId(restaurant.getId());
             dto.setName(restaurant.getName());
-            dto.setClientName(restaurant.getClientUserId().getName());
+            dto.setClientName(restaurant.getClient().getName());
             dto.setLocation(restaurant.getLocation());
             dto.setStyle(restaurant.getStyle());
             dto.setCost(restaurant.getCost());
@@ -101,10 +105,11 @@ public class AdminController {
         return totalRating / reviews.size();
     }
 
-    //customer
-    @GetMapping("/admin/customers")
+    // customer
+    @GetMapping("/customers")
+    @PreAuthorize("hasAuthority('customer:read')")
     public List<UserDTO> getCustomerDetailsAdmin() {
-        List<Customer> customers = customerRepository.findAll();
+        Optional<User> customers = userRepository.findAllByRole(Role.CUSTOMER);
 
         return customers.stream().map(customer -> {
             UserDTO dto = new UserDTO();
@@ -112,9 +117,8 @@ public class AdminController {
             dto.setName(customer.getName());
             dto.setSurname(customer.getSurname());
             dto.setEmail(customer.getEmail());
-            dto.setLocation(customer.getLocation());
             dto.setUsername(customer.getUsername());
-            dto.setTotalReviews(reviewRepository.findByCustomerUserId(customer).size());
+            dto.setTotalReviews(reviewRepository.findByCustomer(customer).size());
             return dto;
         }).collect(Collectors.toList());
     }

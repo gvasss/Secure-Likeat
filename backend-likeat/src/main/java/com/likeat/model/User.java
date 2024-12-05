@@ -2,40 +2,66 @@ package com.likeat.model;
 
 import jakarta.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.Builder;
+import lombok.Data;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "userType")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = Customer.class, name = "customer"),
-        @JsonSubTypes.Type(value = Client.class, name = "client"),
-        @JsonSubTypes.Type(value = Admin.class, name = "admin")
-})
-
-@Entity
-//@Table(name = "user")
-@Inheritance(strategy = InheritanceType.JOINED)
-@Setter
-@Getter
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class User {
+@Entity
+public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.AUTO
-    )
+    @GeneratedValue
     private Long id;
     private String username;
     private String name;
     private String surname;
     private String password;
     private String email;
-    private String role;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role.getAuthorities();
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

@@ -15,15 +15,7 @@ import lombok.*;
 public class Review {
 
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "review_sequence"
-    )
-    @SequenceGenerator(
-            name = "review_sequence",
-            sequenceName = "review_sequence",
-            allocationSize = 1
-    )
+    @GeneratedValue
     private Long id;
 
     private int rating;
@@ -33,7 +25,7 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "customer_user_id", referencedColumnName = "id")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    private Customer customerUserId;
+    private User customer;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", referencedColumnName = "id")

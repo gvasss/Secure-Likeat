@@ -1,75 +1,55 @@
 package com.likeat.controller;
 
+import com.likeat.dto.RestaurantDTO;
 import com.likeat.exception.UserNotFoundException;
-import com.likeat.model.Client;
+import com.likeat.model.RestaurantStatus;
+import com.likeat.model.User;
 import com.likeat.model.Restaurant;
-import com.likeat.repository.ClientRepository;
+import com.likeat.repository.UserRepository;
 import com.likeat.repository.RestaurantRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@RequestMapping("/likeat/users/clients")
+@PreAuthorize("hasRole('CLIENT')")
 public class ClientController {
 
     @Autowired
-    private ClientRepository clientRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private RestaurantRepository restaurantRepository;
 
-    @PostMapping("/client")
-    Client newClient(@RequestBody Client newClient) {
-        return clientRepository.save(newClient);
+    @GetMapping("/{id}/restaurants")
+    @PreAuthorize("hasAuthority('restaurant:read')")
+    public List<Restaurant> getClientRestaurants(@PathVariable Long id) {
+        User client = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        return restaurantRepository.findByClient(client);
     }
 
-    @GetMapping("/clients")
-    List<Client> getAllClients() {
-        return clientRepository.findAll();
-    }
+    @PostMapping("/restaurant")
+    @PreAuthorize("hasAuthority('restaurant:create')")
+    public Restaurant newRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
+        User client = userRepository.findById(restaurantDTO.getClientUserId())
+                .orElseThrow(() -> new RuntimeException("Client not found"));
 
-    @GetMapping("/client/{user_id}")
-    Client getClientById(@PathVariable Long user_id) {
-        return clientRepository.findById(user_id)
-                .orElseThrow(()->new UserNotFoundException(user_id));
-    }
-
-    @PutMapping("/client/{user_id}")
-    Client getUpdatedClient(@PathVariable Long user_id, @RequestBody Client updatedClient) {
-        return clientRepository.findById(user_id)
-                .map(Client -> {
-                    Client.setUsername(updatedClient.getUsername());
-                    Client.setName(updatedClient.getName());
-                    Client.setSurname(updatedClient.getSurname());
-                    Client.setEmail(updatedClient.getEmail());
-                    return clientRepository.save(Client);
-                }).orElseThrow(()->new UserNotFoundException(user_id));
-    }
-
-    @DeleteMapping("/client/{user_id}")
-    String deleteClient(@PathVariable Long user_id) {
-        if (!clientRepository.existsById(user_id)) {
-            throw new UserNotFoundException(user_id);
-        }
-
-        Client client = clientRepository.findById(user_id)
-                .orElseThrow(() -> new UserNotFoundException(user_id));
-
-        List<Restaurant> restaurants = restaurantRepository.findByClientUserId(client);
-        if (!restaurants.isEmpty()) {
-            restaurantRepository.deleteAll(restaurants);
-        }
-
-        clientRepository.deleteById(user_id);
-        return "Client with id " + user_id + " and their restaurants deleted.";
-    }
-
-    @GetMapping("/client/{user_id}/restaurants")
-    public List<Restaurant> getClientRestaurants(@PathVariable Long user_id) {
-        Client client = clientRepository.findById(user_id)
-                .orElseThrow(() -> new UserNotFoundException(user_id));
-        return restaurantRepository.findByClientUserId(client);
+        Restaurant restaurant = new Restaurant();
+        restaurant.setClient(client);
+        restaurant.setName(restaurantDTO.getName());
+        restaurant.setAddress(restaurantDTO.getAddress());
+        restaurant.setStyle(restaurantDTO.getStyle());
+        restaurant.setCuisine(restaurantDTO.getCuisine());
+        restaurant.setCost(restaurantDTO.getCost());
+        restaurant.setInformation(restaurantDTO.getInformation());
+        restaurant.setPhone(restaurantDTO.getPhone());
+        restaurant.setOpeningHours(restaurantDTO.getOpeningHours());
+        restaurant.setLocation(restaurantDTO.getLocation());
+        restaurant.setStatus(RestaurantStatus.PENDING);
+        return restaurantRepository.save(restaurant);
     }
 }

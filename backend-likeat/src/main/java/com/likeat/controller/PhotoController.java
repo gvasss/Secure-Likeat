@@ -5,6 +5,7 @@ import com.likeat.model.Photo;
 import com.likeat.model.Restaurant;
 import com.likeat.repository.PhotoRepository;
 import com.likeat.repository.RestaurantRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/photos")
-@CrossOrigin("http://localhost:3000")
+@RequestMapping("/likeat/photos")
+@RequiredArgsConstructor
 public class PhotoController {
 
     @Autowired

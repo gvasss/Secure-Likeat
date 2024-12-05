@@ -17,15 +17,13 @@ import java.util.stream.DoubleStream;
 public class Restaurant {
 
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.AUTO
-    )
+    @GeneratedValue
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "client_user_id", referencedColumnName = "id")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    private Client clientUserId;
+    private User client;
 
     private String name;
     private String address;
