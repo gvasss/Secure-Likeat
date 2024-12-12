@@ -1,40 +1,81 @@
 package com.likeat.controller;
 
 import com.likeat.dto.RestaurantDTO;
-import com.likeat.dto.ReviewDTO;
-import com.likeat.exception.RestaurantNotFoundException;
-import com.likeat.exception.UserNotFoundException;
-import com.likeat.model.*;
-import com.likeat.repository.UserRepository;
-import com.likeat.repository.RestaurantRepository;
-import com.likeat.repository.ReviewRepository;
-import com.likeat.repository.PhotoRepository;
 import com.likeat.dto.RestaurantHomeDTO;
-
+import com.likeat.model.Restaurant;
+import com.likeat.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @RestController
 @RequestMapping("/likeat/restaurants")
 @RequiredArgsConstructor
 public class RestaurantController {
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    private final RestaurantService restaurantService;
 
-    @Autowired
-    private UserRepository userRepository;
+    @GetMapping("/home")
+    public List<RestaurantHomeDTO> getAllRestaurantsHome() {
+        return restaurantService.getAllRestaurantsHome();
+    }
 
-    @Autowired
-    private ReviewRepository reviewRepository;
+    @GetMapping("/{id}/details")
+    @PreAuthorize("hasAnyAuthority('resturant:read') or hasAnyRole('CUSTOMER', 'CLIENT', 'ADMIN')")
+    public RestaurantHomeDTO getRestaurantDetails(@PathVariable Long id) {
+        return restaurantService.getRestaurantDetails(id);
+    }
 
-    @Autowired
-    private PhotoRepository photoRepository;
+    @PutMapping("/restaurant/{id}")
+    @PreAuthorize("hasAnyAuthority('resturant:update') or hasAnyRole('CLIENT')")
+    public Restaurant getUpdatedRestaurant(@PathVariable Long id, @RequestBody Restaurant updatedRestaurant) {
+        return restaurantService.updateRestaurant(id, updatedRestaurant);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('resturant:delete') or hasAnyRole('CLIENT', 'ADMIN')")
+    public String deleteRestaurant(@PathVariable Long id) {
+        return restaurantService.deleteRestaurant(id);
+    }
+
+    @GetMapping("/request")
+    @PreAuthorize("hasAnyAuthority('resturant:read') or hasAnyRole('ADMIN')")
+    public List<Restaurant> getAllRequest() {
+        return restaurantService.getAllRequest();
+    }
+
+    @PutMapping("/{id}/statusAccept")
+    @PreAuthorize("hasAnyAuthority('resturant:update') or hasAnyRole('ADMIN')")
+    public Restaurant updateAcceptStatus(@PathVariable Long id) {
+        return restaurantService.updateAcceptStatus(id);
+    }
+
+    @PutMapping("/restaurant/statusReject/{id}")
+    @PreAuthorize("hasAnyAuthority('resturant:update') or hasAnyRole('ADMIN')")
+    public Restaurant updateRejectStatus(@PathVariable Long id) {
+        return restaurantService.updateRejectStatus(id);
+    }
+
+    @GetMapping("/{id}/client")
+    @PreAuthorize("hasAnyAuthority('resturant:read') or hasAnyRole('CLIENT')")
+    public List<Restaurant> getClientRestaurants(@PathVariable Long id) {
+        return restaurantService.getClientRestaurants(id);
+    }
+
+    @PostMapping("/restaurant")
+    @PreAuthorize("hasAnyAuthority('resturant:create') or hasAnyRole('CLIENT')")
+    public Restaurant newRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
+        return restaurantService.addRestaurant(restaurantDTO);
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasAnyAuthority('resturant:read') or hasAnyRole('ADMIN')")
+    public List<RestaurantHomeDTO> getRestaurantDetailsAdmin() {
+        return restaurantService.getRestaurantDetailsAdmin();
+    }
+}
 
 //    @PostMapping("/restaurant")
 //    public Restaurant newRestaurant(@RequestBody RestaurantDTO restaurantDTO) {
@@ -62,153 +103,15 @@ public class RestaurantController {
 //        return restaurantRepository.findByStatus(status);
 //    }
 
-    // all
-    @GetMapping("/restaurants/home")
-    public List<RestaurantHomeDTO> getAllRestaurantsHome() {
-        RestaurantStatus status = RestaurantStatus.ACCEPT;
-        List<Restaurant> restaurants = restaurantRepository.findByStatus(status);
+//    @GetMapping("/checkRestaurant")
+//    public ResponseEntity<Boolean> checkRestaurantExists(@RequestParam String name, @RequestParam String address) {
+//        Restaurant restaurant = restaurantRepository.findByNameAndAddress(name, address);
+//        return ResponseEntity.ok(restaurant != null);
+//    }
 
-        return restaurants.stream().map(restaurant -> {
-            RestaurantHomeDTO dto = new RestaurantHomeDTO();
-            dto.setId(restaurant.getId());
-            List<Photo> photos = photoRepository.findByRestaurantIdAndIsMain(restaurant.getId(), true);
-            dto.setPhoto(photos);
-            dto.setName(restaurant.getName());
-            dto.setLocation(restaurant.getLocation());
-            dto.setStyle(restaurant.getStyle());
-            dto.setCuisine(restaurant.getCuisine());
-            dto.setCost(restaurant.getCost());
-            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
-            dto.setOverallRating(calculateAverageRating(reviews));
-            dto.setTotalReviews(reviews.size());
-
-            return dto;
-        }).collect(Collectors.toList());
-    }
-
-    // all
-    @GetMapping("/restaurant/{id}/details")
-    public RestaurantHomeDTO getRestaurantDetails(@PathVariable Long id) {
-        Optional<Restaurant> restaurantDetails = restaurantRepository.findById(id);
-
-        return restaurantDetails.map(restaurant -> {
-            RestaurantHomeDTO dto = new RestaurantHomeDTO();
-            dto.setId(restaurant.getId());
-            List<Photo> photos = photoRepository.findByRestaurantId(restaurant.getId());
-            dto.setPhoto(photos);
-            dto.setName(restaurant.getName());
-            dto.setLocation(restaurant.getLocation());
-            dto.setStyle(restaurant.getStyle());
-            dto.setCuisine(restaurant.getCuisine());
-            dto.setCost(restaurant.getCost());
-            dto.setInformation(restaurant.getInformation());
-            dto.setPhone(restaurant.getPhone());
-            dto.setOpeningHours(restaurant.getOpeningHours());
-            dto.setAddress(restaurant.getAddress());
-            dto.setClientName(restaurant.getClient().getName());
-            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
-            dto.setReviews(reviews.stream().map(review -> {
-                ReviewDTO reviewDTO = new ReviewDTO();
-                reviewDTO.setRestaurantId(review.getRestaurantId().getId());
-                reviewDTO.setRating(review.getRating());
-                reviewDTO.setDescription(review.getDescription());
-                reviewDTO.setDate(review.getDate());
-                reviewDTO.setCustomerName(review.getCustomer().getName());
-                return reviewDTO;
-            }).collect(Collectors.toList()));
-            dto.setOverallRating(calculateAverageRating(reviews));
-            dto.setTotalReviews(reviews.size());
-
-            return dto;
-        }).orElseThrow(() -> new RestaurantNotFoundException(id));
-    }
-
-    @GetMapping("/restaurant/{id}")
-    public Restaurant getRestaurantById(@PathVariable Long id) {
-        return restaurantRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    @PutMapping("/restaurant/{id}")
-    public Restaurant getUpdatedRestaurant(@PathVariable Long id, @RequestBody Restaurant updatedRestaurant) {
-        return restaurantRepository.findById(id)
-                .map(restaurant -> {
-                    restaurant.setName(updatedRestaurant.getName());
-                    restaurant.setAddress(updatedRestaurant.getAddress());
-                    restaurant.setStyle(updatedRestaurant.getStyle());
-                    restaurant.setCuisine(updatedRestaurant.getCuisine());
-                    restaurant.setCost(updatedRestaurant.getCost());
-                    restaurant.setInformation(updatedRestaurant.getInformation());
-                    restaurant.setPhone(updatedRestaurant.getPhone());
-                    restaurant.setOpeningHours(updatedRestaurant.getOpeningHours());
-                    restaurant.setLocation(updatedRestaurant.getLocation());
-                    restaurant.setStatus(RestaurantStatus.PENDING);
-                    return restaurantRepository.save(restaurant);
-                }).orElseThrow(() -> new RestaurantNotFoundException(id));
-    }
-
-    // admin client
-    @DeleteMapping("/restaurant/{id}")
-    public String deleteRestaurant(@PathVariable Long id) {
-        if (!restaurantRepository.existsById(id)) {
-            throw new RestaurantNotFoundException(id);
-        }
-        restaurantRepository.deleteById(id);
-        return "Restaurant with id " + id + " deleted.";
-    }
-
-    @GetMapping("/restaurant/{id}/reviews")
-    public List<Review> getRestaurantReviews(@PathVariable Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-        return reviewRepository.findByRestaurantId(restaurant);
-    }
-
-    @GetMapping("/restaurant/request")
-    public List<Restaurant> getAllRequest(@RequestParam(required = false) String location) {
-        RestaurantStatus status = RestaurantStatus.PENDING;
-        return restaurantRepository.findByStatus(status);
-    }
-
-    @PutMapping("/restaurant/statusAccept/{id}")
-    public Restaurant updateAcceptStatus(@PathVariable Long id) {
-        Optional<Restaurant> restaurantOptional = restaurantRepository.findById(id);
-        if (restaurantOptional.isPresent()) {
-            RestaurantStatus status = RestaurantStatus.ACCEPT;
-            Restaurant restaurant = restaurantOptional.get();
-            restaurant.setStatus(status);
-            return restaurantRepository.save(restaurant);
-        } else {
-            throw new RuntimeException("Restaurant not found with id " + id);
-        }
-    }
-
-    @PutMapping("/restaurant/statusReject/{id}")
-    public Restaurant updateRejectStatus(@PathVariable Long id) {
-        Optional<Restaurant> restaurantOptional = restaurantRepository.findById(id);
-        if (restaurantOptional.isPresent()) {
-            RestaurantStatus status = RestaurantStatus.REJECT;
-            Restaurant restaurant = restaurantOptional.get();
-            restaurant.setStatus(status);
-            return restaurantRepository.save(restaurant);
-        } else {
-            throw new RuntimeException("Restaurant not found with id " + id);
-        }
-    }
-
-    @GetMapping("/checkRestaurant")
-    public ResponseEntity<Boolean> checkRestaurantExists(@RequestParam String name, @RequestParam String address) {
-        Restaurant restaurant = restaurantRepository.findByNameAndAddress(name, address);
-        return ResponseEntity.ok(restaurant != null);
-    }
-
-    private double calculateAverageRating(List<Review> reviews) {
-        if (reviews == null || reviews.isEmpty()) {
-            return 0.0;
-        }
-        double totalRating = reviews.stream()
-                .mapToInt(Review::getRating)
-                .sum();
-        return totalRating / reviews.size();
-    }
-}
+//    @GetMapping("/restaurant/{id}")
+//    @PreAuthorize("hasAnyAuthority('resturant:read') or hasAnyRole('CLIENT', 'ADMIN')")
+//    public Restaurant getRestaurantById(@PathVariable Long id) {
+//        return restaurantRepository.findById(id)
+//                .orElseThrow(() -> new UserNotFoundException(id));
+//    }

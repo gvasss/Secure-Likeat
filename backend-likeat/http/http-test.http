@@ -1,0 +1,18 @@
+### Register User
+POST http://localhost:8080/likeat/auth/register
+Content-Type: application/json
+
+{
+  "username": "Ali",
+  "name": "Ali",
+  "surname": "Bouali",
+  "email":  "alibou21@mail.com",
+  "password": "password",
+  "role":  "ADMIN"
+}
+
+> {% client.global.set("auth-token", response.body.access_token);  %}
+
+#### Query the Demo endpoint
+#GET http://localhost:8080/likeat/demo-controller
+#Authorization: Bearer {{auth-token}}

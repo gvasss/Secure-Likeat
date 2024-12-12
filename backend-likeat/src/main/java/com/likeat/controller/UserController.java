@@ -1,15 +1,15 @@
 package com.likeat.controller;
 
-import com.likeat.exception.UserNotFoundException;
-import com.likeat.model.*;
-import com.likeat.repository.RestaurantRepository;
-import com.likeat.repository.ReviewRepository;
-import com.likeat.repository.UserRepository;
+import com.likeat.dto.UserDTO;
+import com.likeat.request.ChangePasswordRequest;
+import com.likeat.request.UpdateUserRequest;
+import com.likeat.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -17,17 +17,94 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserService service;
 
-    @Autowired
-    private ReviewRepository reviewRepository;
+    // USER
+    @GetMapping("/{connectedUser}")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'CLIENT', 'ADMIN')")
+    public UserDTO getProfile(@PathVariable Principal connectedUser) {
+        return service.getProfile(connectedUser);
+    }
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
+    @PutMapping("/update")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'CLIENT', 'ADMIN')")
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest request, Principal connectedUser) {
+        service.updateUser(request, connectedUser);
+        return ResponseEntity.ok().build();
+    }
 
-//    @Autowired
-//    private ReviewRepository reviewRepository;
+    @PatchMapping("/change-password")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'CLIENT', 'ADMIN')")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Principal connectedUser) {
+        service.changePassword(request, connectedUser);
+        return ResponseEntity.ok().build();
+    }
+
+    // CLIENT
+    @DeleteMapping("/client/{connectedUser}")
+    @PreAuthorize("hasAnyAuthority('client:delete') or hasAnyRole('CLIENT')")
+    String deleteClient(@PathVariable Principal connectedUser) {
+        return service.deleteClient(connectedUser);
+    }
+
+    // CUSTOMER
+    @DeleteMapping("/customer/{connectedUser}")
+    @PreAuthorize("hasAnyAuthority('customer:delete') or hasAnyRole('CUSTOMER')")
+    String deleteCustomer(@PathVariable Principal connectedUser) {
+        return service.deleteCustomer(connectedUser);
+    }
+
+    // ADMIN
+    @DeleteMapping("/admin/{connectedUser}")
+    @PreAuthorize("hasAnyAuthority('admin:delete') or hasAnyRole('ADMIN')")
+    String deleteAdmin(@PathVariable Principal connectedUser) {
+        return service.deleteAdmin(connectedUser);
+    }
+
+        // dashboard view
+    @GetMapping("/admins")
+    @PreAuthorize("hasAnyAuthority('admin:read') or hasAnyRole('ADMIN')")
+    public List<UserDTO> getAdmins() {
+        return service.getAdmins();
+    }
+
+    @GetMapping("/clients")
+    @PreAuthorize("hasAnyAuthority('client:read') or hasAnyRole('ADMIN')")
+    public List<UserDTO> getClients() {
+        return service.getClients();
+    }
+
+    @GetMapping("/customers")
+    @PreAuthorize("hasAnyAuthority('customer:read') or hasAnyRole('ADMIN')")
+    public List<UserDTO> getCustomers() {
+        return service.getCustomers();
+    }
+
+        //dashboard delete
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasAuthority('admin:delete')")
+    String deleteAdmin(@PathVariable Long id) {
+        return service.deleteAdmin(id);
+    }
+
+    @DeleteMapping("/client/{id}")
+    @PreAuthorize("hasAuthority('client:delete')")
+    String deleteClient(@PathVariable Long id) {
+        return service.deleteClient(id);
+    }
+
+    @DeleteMapping("/customer/{id}")
+    @PreAuthorize("hasAuthority('customer:delete')")
+    String deleteCustomer(@PathVariable Long id) {
+        return service.deleteCustomer(id);
+    }
+
+        // dashboard details
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public UserDTO getUser(@PathVariable Long id) {
+        return service.getUser(id);
+    }
 
 //    @PostMapping("/user")
 //    User newUser(@RequestBody User newUser) {
@@ -38,8 +115,6 @@ public class UserController {
 //    List<User> getAllUsers() {
 //        return userRepository.findAll();
 //    }
-
-    // USER
 
 //    @GetMapping("/{id}")
 //    User getUserById(@PathVariable Long id) {
@@ -67,18 +142,6 @@ public class UserController {
 //        User user = userRepository.findByEmail(email);
 //        return ResponseEntity.ok(user != null);
 //    }
-
-    @GetMapping("/checkUsernameForUpdate/{id}/{username}")
-    public ResponseEntity<Boolean> checkUsernameForUpdate(@PathVariable Long id, @PathVariable String username) {
-        boolean exists = userRepository.existsByUsernameAndIdNot(username, id);
-        return ResponseEntity.ok(exists);
-    }
-
-    @GetMapping("/checkEmailForUpdate/{id}/{email}")
-    public ResponseEntity<Boolean> checkEmailForUpdate(@PathVariable Long id, @PathVariable String email) {
-        boolean exists = userRepository.existsByEmailAndIdNot(email, id);
-        return ResponseEntity.ok(exists);
-    }
 
 //    @PostMapping("/user/{id}/verify-password")
 //    public ResponseEntity<?> verifyPassword(@PathVariable Long id, @RequestBody Map<String, String> request) {
@@ -120,37 +183,6 @@ public class UserController {
 //        }).orElseThrow(() -> new UserNotFoundException(id));
 //    }
 
-    @PutMapping("/{id}")
-    User getUpdatedUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        return userRepository.findById(id)
-                .map(User -> {
-                    User.setUsername(updatedUser.getUsername());
-                    User.setName(updatedUser.getName());
-                    User.setSurname(updatedUser.getSurname());
-                    User.setEmail(updatedUser.getEmail());
-                    return userRepository.save(User);
-                }).orElseThrow(()->new UserNotFoundException(id));
-    }
-
-    // CLIENT
-    @DeleteMapping("/client/{id}")
-    String deleteClient(@PathVariable Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
-        }
-
-        User client = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        List<Restaurant> restaurants = restaurantRepository.findByClient(client);
-        if (!restaurants.isEmpty()) {
-            restaurantRepository.deleteAll(restaurants);
-        }
-
-        userRepository.deleteById(id);
-        return "Client with id " + id + " and their restaurants deleted.";
-    }
-
 //    @GetMapping("/client/{id}/restaurants")
 //    public List<Restaurant> getClientRestaurants(@PathVariable Long id) {
 //        User client = userRepository.findById(id)
@@ -158,29 +190,12 @@ public class UserController {
 //        return restaurantRepository.findByClient(client);
 //    }
 
-    // CUSTOMER
 //    @GetMapping("/customers")
 //    public Optional<User> getAllCustomers() {
 //        return userRepository.findAllByRole(Role.CUSTOMER);
 //    }
 
-    @DeleteMapping("/customer/{id}")
-    String deleteCustomer(@PathVariable Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
-        }
 
-        User customer = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-
-        List<Review> reviews = reviewRepository.findByCustomer(customer);
-        if (!reviews.isEmpty()) {
-            reviewRepository.deleteAll(reviews);
-        }
-
-        userRepository.deleteById(id);
-        return "Customer with id " + id + " and their reviews deleted.";
-    }
 
 //    @GetMapping("/customer/{id}/reviews")
 //    public List<Review> getCustomerReviews(@PathVariable Long id) {

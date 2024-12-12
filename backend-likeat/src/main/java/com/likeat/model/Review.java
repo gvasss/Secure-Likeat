@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-//@Table(name = "review")
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -30,6 +29,5 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    private Restaurant restaurantId;
-
+    private Restaurant restaurant;
 }

@@ -7,8 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import static com.likeat.model.Role.ADMIN;
-import static com.likeat.model.Role.CUSTOMER;
+import static com.likeat.model.Role.*;
 
 @SpringBootApplication
 public class DemoApplication {
@@ -40,6 +39,15 @@ public class DemoApplication {
                     .build();
             System.out.println("Customer token: " + service.register(customer).getAccessToken());
 
+            var client = RegisterRequest.builder()
+                    .username("client")
+                    .name("client")
+                    .surname("client")
+                    .email("client@mail.com")
+                    .password("client")
+                    .role(CLIENT)
+                    .build();
+            System.out.println("Client token: " + service.register(client).getAccessToken());
         };
     }
 }

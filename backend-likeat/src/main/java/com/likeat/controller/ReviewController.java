@@ -1,101 +1,57 @@
 package com.likeat.controller;
 
 import com.likeat.dto.ReviewDTO;
-import com.likeat.exception.ReviewNotFoundException;
 import com.likeat.exception.UserNotFoundException;
 import com.likeat.model.Restaurant;
 import com.likeat.model.Review;
 import com.likeat.model.User;
-import com.likeat.repository.ReviewRepository;
-import com.likeat.repository.RestaurantRepository;
-import com.likeat.repository.UserRepository;
+import com.likeat.service.ReviewService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/likeat/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
-    @Autowired
-    private ReviewRepository reviewRepository;
+    private final ReviewService reviewService;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RestaurantRepository restaurantRepository;
-
-    @PostMapping("/review")
-    public Review newReview(@RequestBody ReviewDTO reviewDTO) {
-        User customer = userRepository.findById(reviewDTO.getCustomerUserId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        // Convert restaurantId to Restaurant object
-        Restaurant restaurant = restaurantRepository.findById(reviewDTO.getRestaurantId())
-                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
-
-        // Create Review object
-        Review review = new Review(
-                null,
-                reviewDTO.getRating(),
-                reviewDTO.getDescription(),
-                reviewDTO.getDate(),
-                customer,
-                restaurant
-        );
-
-        return reviewRepository.save(review);
+    @PostMapping("/")
+    @PreAuthorize("hasAnyAuthority('review:create') or hasAnyRole('CLIENT')")
+    public Review addReview(@RequestBody ReviewDTO reviewDTO) {
+        return reviewService.addReview(reviewDTO);
     }
 
-    @GetMapping("/reviews")
-    List<Review> getAllReviews() {
-        return reviewRepository.findAll();
+    @GetMapping("/")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public List<ReviewDTO> getAllReviews() {
+        return reviewService.getAllReviews();
     }
 
-    @GetMapping("/review/{id}")
-    Review getReviewById(@PathVariable Long id) {
-        return reviewRepository.findById(id)
-                .orElseThrow(()->new ReviewNotFoundException(id));
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('review:read') or hasAnyRole('CUSTOMER', 'ADMIN')")
+    public ReviewDTO getReviewById(@PathVariable Long id) {
+        return reviewService.getReviewById(id);
     }
 
-    @PutMapping("/review/{id}")
-    Review getUpdatedReview(@PathVariable Long id, @RequestBody Review updatedReview) {
-        return reviewRepository.findById(id)
-                .map(Review -> {
-                    Review.setRating(updatedReview.getRating());
-                    Review.setDescription(updatedReview.getDescription());
-                    Review.setDate(updatedReview.getDate());
-                    return reviewRepository.save(Review);
-                }).orElseThrow(()->new ReviewNotFoundException(id));
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('review:delete') or hasAnyRole('CUSTOMER', 'ADMIN')")
+    public String deleteReview(@PathVariable Long id) {
+        return reviewService.deleteReview(id);
     }
 
-    @DeleteMapping("/review/{id}")
-    String deleteReview(@PathVariable Long id) {
-        if (!reviewRepository.existsById(id)) {
-            throw new ReviewNotFoundException(id);
-        }
-        reviewRepository.deleteById(id);
-        return "Review with id " + id + " deleted.";
+    @GetMapping("/customer/{id}")
+    @PreAuthorize("hasAnyAuthority('review:read') or hasAnyRole('CUSTOMER')")
+    public List<ReviewDTO> getCustomerReviews(@PathVariable Long id) {
+        return reviewService.getCustomerReviews(id);
     }
 
-    @GetMapping("/restaurant/{id}/review-summary")
-    public Map<String, Object> getReviewSummary(@PathVariable Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-        List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
-        int reviewCount = reviews.size();
-        double averageRating = reviews.stream().mapToDouble(Review::getRating).average().orElse(0.0);
-
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("averageRating", averageRating);
-        summary.put("reviewCount", reviewCount);
-
-        return summary;
+    @GetMapping("/{id}/reviews")
+    @PreAuthorize("hasAnyAuthority('review:read') or hasAnyRole('CLIENT')")
+    public List<ReviewDTO> getRestaurantReviews(@PathVariable Long id) {
+        return reviewService.getRestaurantReviews(id);
     }
 }
