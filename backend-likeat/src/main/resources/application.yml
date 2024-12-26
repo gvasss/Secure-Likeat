@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -17,9 +17,30 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     open-in-view: true
     generate-ddl: true
+#  ssl:
+#    bundle:
+#      jks:
+#        web-server:
+#          key:
+#            alias: "server"
+#            password: "password"
+#          keystore:
+#            location: classpath:server.p12
+#            password: "password"
+#            type: "PKCS12"
 
 application:
   security:
     jwt:
       secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
       expiration: 86400000 # a day
+
+#server:
+#  port: 8443
+#  ssl:
+#    bundle: "web-server"
+#    #client-auth: NEED
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173

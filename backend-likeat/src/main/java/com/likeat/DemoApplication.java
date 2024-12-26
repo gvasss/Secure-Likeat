@@ -16,38 +16,38 @@ public class DemoApplication {
         SpringApplication.run(DemoApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner commandLineRunner(AuthenticationService service) {
-        return args -> {
-            var admin = RegisterRequest.builder()
-                    .username("admin")
-                    .name("admin")
-                    .surname("admin")
-                    .email("admin@mail.com")
-                    .password("admin")
-                    .role(ADMIN)
-                    .build();
-            System.out.println("Admin token: " + service.register(admin).getAccessToken());
-
-            var customer = RegisterRequest.builder()
-                    .username("customer")
-                    .name("customer")
-                    .surname("customer")
-                    .email("customer@mail.com")
-                    .password("customer")
-                    .role(CUSTOMER)
-                    .build();
-            System.out.println("Customer token: " + service.register(customer).getAccessToken());
-
-            var client = RegisterRequest.builder()
-                    .username("client")
-                    .name("client")
-                    .surname("client")
-                    .email("client@mail.com")
-                    .password("client")
-                    .role(CLIENT)
-                    .build();
-            System.out.println("Client token: " + service.register(client).getAccessToken());
-        };
-    }
+//    @Bean
+//    public CommandLineRunner commandLineRunner(AuthenticationService service) {
+//        return args -> {
+//            var admin = RegisterRequest.builder()
+//                    .username("admin")
+//                    .name("admin")
+//                    .surname("admin")
+//                    .email("admin@mail.com")
+//                    .password("admin")
+//                    .role(ADMIN)
+//                    .build();
+//            System.out.println("Admin token: " + service.register(admin).getAccessToken());
+//
+//            var customer = RegisterRequest.builder()
+//                    .username("customer")
+//                    .name("customer")
+//                    .surname("customer")
+//                    .email("customer@mail.com")
+//                    .password("customer")
+//                    .role(CUSTOMER)
+//                    .build();
+//            System.out.println("Customer token: " + service.register(customer).getAccessToken());
+//
+//            var client = RegisterRequest.builder()
+//                    .username("client")
+//                    .name("client")
+//                    .surname("client")
+//                    .email("client@mail.com")
+//                    .password("client")
+//                    .role(CLIENT)
+//                    .build();
+//            System.out.println("Client token: " + service.register(client).getAccessToken());
+//        };
+//    }
 }

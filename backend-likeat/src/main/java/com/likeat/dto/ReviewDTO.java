@@ -8,11 +8,10 @@ import java.sql.Date;
 @Setter
 @Getter
 public class ReviewDTO {
-
+    private Long id;
     private int rating;
     private String description;
     private Date date;
-    private Long customerUserId;
-    private Long restaurantId;
     private String customerName;
+    private String restaurantName;
 }

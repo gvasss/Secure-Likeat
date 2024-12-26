@@ -22,7 +22,7 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final RestaurantRepository restaurantRepository;
 
-    public Restaurant addPhoto(Long restaurantId, MultipartFile mainImage, MultipartFile[] additionalImages) throws IOException, SQLException {
+    public void addPhoto(Long restaurantId, MultipartFile mainImage, MultipartFile[] additionalImages) throws IOException, SQLException {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
@@ -54,15 +54,6 @@ public class PhotoService {
                     photoRepository.save(photo);
                 }
             }
-        }
-        return restaurant;
-    }
-
-    public List<Photo> getPhotosByRestaurant(Long restaurantId, Boolean main) {
-        if (main != null && main) {
-            return photoRepository.findByRestaurantIdAndIsMain(restaurantId, true);
-        } else {
-            return photoRepository.findByRestaurantId(restaurantId);
         }
     }
 

@@ -16,11 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,21 +34,13 @@ public class UserService {
     public void updateUser(UpdateUserRequest request, Principal connectedUser) {
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
-        var username = userRepository.existsByUsernameAndIdNot(request.getUsername(), user.getId());
-        if (username) {
-            throw new IllegalStateException("Username already exists");
-        }
         var email = userRepository.existsByEmailAndIdNot(request.getEmail(), user.getId());
         if (email) {
             throw new IllegalStateException("Email already exists");
         }
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new WrongPasswordException();
-        }
 
         userRepository.findById(user.getId())
             .map(existingUser -> {
-                existingUser.setUsername(request.getUsername());
                 existingUser.setName(request.getName());
                 existingUser.setSurname(request.getSurname());
                 existingUser.setEmail(request.getEmail());
@@ -65,7 +55,7 @@ public class UserService {
             throw new WrongPasswordException();
         }
         if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
-            throw new IllegalStateException("Password are not the same");
+            throw new IllegalStateException("Passwords are not the same");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -86,12 +76,13 @@ public class UserService {
     }
 
         // user for admin
-    public UserDTO getUser(Long id) {
+    public UserDTO getUserById(Long id) {
         var currentUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
         return UserDTO.builder()
                 .id(currentUser.getId())
+                .role(String.valueOf(currentUser.getRole()))
                 .username(currentUser.getUsername())
                 .surname(currentUser.getSurname())
                 .name(currentUser.getName())
@@ -187,6 +178,7 @@ public class UserService {
                         .surname(user.getSurname())
                         .name(user.getName())
                         .email(user.getEmail())
+                        .totalReviews(reviewRepository.countByCustomer(user))
                         .build())
                 .collect(Collectors.toList());
     }

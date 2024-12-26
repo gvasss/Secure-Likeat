@@ -1,15 +1,16 @@
 package com.likeat.service;
 
 import com.likeat.dto.RestaurantDTO;
-import com.likeat.dto.RestaurantHomeDTO;
 import com.likeat.dto.ReviewDTO;
 import com.likeat.exception.RestaurantNotFoundException;
-import com.likeat.exception.UserNotFoundException;
 import com.likeat.model.*;
 import com.likeat.repository.*;
+import com.likeat.request.RestaurantRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,40 +20,53 @@ import java.util.stream.Collectors;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
-    private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final PhotoRepository photoRepository;
 
-    public List<RestaurantHomeDTO> getAllRestaurantsHome() {
+    // Public endpoints
+    public List<RestaurantDTO> getAllRestaurants() {
         RestaurantStatus status = RestaurantStatus.ACCEPT;
         List<Restaurant> restaurants = restaurantRepository.findByStatus(status);
 
         return restaurants.stream().map(restaurant -> {
-            RestaurantHomeDTO dto = new RestaurantHomeDTO();
+            RestaurantDTO dto = new RestaurantDTO();
             dto.setId(restaurant.getId());
-            List<Photo> photos = photoRepository.findByRestaurantIdAndIsMain(restaurant.getId(), true);
-            dto.setPhoto(photos);
+            List<Photo> photos = photoRepository.findByRestaurantId(restaurant.getId());
+            dto.setMainPhoto(photos.stream()
+                .filter(Photo::getIsMain)
+                .findFirst()
+                .orElse(null));
+            dto.setAdditionalPhotos(photos.stream()
+                .filter(photo -> !photo.getIsMain())
+                .collect(Collectors.toList()));
             dto.setName(restaurant.getName());
             dto.setLocation(restaurant.getLocation());
             dto.setStyle(restaurant.getStyle());
             dto.setCuisine(restaurant.getCuisine());
             dto.setCost(restaurant.getCost());
-            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
+            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant.getId());
             dto.setOverallRating(calculateAverageRating(reviews));
             dto.setTotalReviews(reviews.size());
+            dto.setClientName(restaurant.getClient().getName());
 
             return dto;
         }).collect(Collectors.toList());
     }
 
-    public RestaurantHomeDTO getRestaurantDetails(Long id) {
+    public RestaurantDTO getRestaurant(Long id) {
         Optional<Restaurant> restaurantDetails = restaurantRepository.findById(id);
 
         return restaurantDetails.map(restaurant -> {
-            RestaurantHomeDTO dto = new RestaurantHomeDTO();
+            RestaurantDTO dto = new RestaurantDTO();
             dto.setId(restaurant.getId());
             List<Photo> photos = photoRepository.findByRestaurantId(restaurant.getId());
-            dto.setPhoto(photos);
+            dto.setMainPhoto(photos.stream()
+                    .filter(Photo::getIsMain)
+                    .findFirst()
+                    .orElse(null));
+            dto.setAdditionalPhotos(photos.stream()
+                    .filter(photo -> !photo.getIsMain())
+                    .collect(Collectors.toList()));
             dto.setName(restaurant.getName());
             dto.setLocation(restaurant.getLocation());
             dto.setStyle(restaurant.getStyle());
@@ -63,10 +77,10 @@ public class RestaurantService {
             dto.setOpeningHours(restaurant.getOpeningHours());
             dto.setAddress(restaurant.getAddress());
             dto.setClientName(restaurant.getClient().getName());
-            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
+            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant.getId());
             dto.setReviews(reviews.stream().map(review -> {
                 ReviewDTO reviewDTO = new ReviewDTO();
-                reviewDTO.setRestaurantId(review.getRestaurant().getId());
+                reviewDTO.setRestaurantName(review.getRestaurant().getName());
                 reviewDTO.setRating(review.getRating());
                 reviewDTO.setDescription(review.getDescription());
                 reviewDTO.setDate(review.getDate());
@@ -80,7 +94,8 @@ public class RestaurantService {
         }).orElseThrow(() -> new RestaurantNotFoundException(id));
     }
 
-    public Restaurant updateRestaurant(Long id, Restaurant updatedRestaurant) {
+    // Client endpoints
+    public Restaurant updateRestaurant(Long id, RestaurantRequest updatedRestaurant) {
         return restaurantRepository.findById(id)
                 .map(restaurant -> {
                     restaurant.setName(updatedRestaurant.getName());
@@ -105,12 +120,55 @@ public class RestaurantService {
         return "Restaurant with id " + id + " deleted.";
     }
 
-    public List<Restaurant> getAllRequest() {
-        RestaurantStatus status = RestaurantStatus.PENDING;
-        return restaurantRepository.findByStatus(status);
+    public List<Restaurant> getClientRestaurants(Principal connectedUser) {
+        var client = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        return restaurantRepository.findByClient(client);
     }
 
-    public Restaurant updateAcceptStatus(Long id) {
+    public Long addRestaurant(RestaurantRequest newRestaurant, Principal connectedUser) {
+        var client = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        var restaurant = Restaurant.builder()
+                .client(client)
+                .name(newRestaurant.getName())
+                .address(newRestaurant.getAddress())
+                .style(newRestaurant.getStyle())
+                .cuisine(newRestaurant.getCuisine())
+                .cost(newRestaurant.getCost())
+                .information(newRestaurant.getInformation())
+                .phone(newRestaurant.getPhone())
+                .openingHours(newRestaurant.getOpeningHours())
+                .location(newRestaurant.getLocation())
+                .status(RestaurantStatus.PENDING)
+                .build();
+        restaurantRepository.save(restaurant);
+        return restaurant.getId();
+    }
+
+    // Admin endpoints
+    public List<RestaurantDTO> getAllRequest() {
+        RestaurantStatus status = RestaurantStatus.PENDING;
+        List<Restaurant> restaurants = restaurantRepository.findByStatus(status);
+
+        return restaurants.stream().map(restaurant -> {
+            RestaurantDTO dto = new RestaurantDTO();
+            dto.setId(restaurant.getId());
+            dto.setName(restaurant.getName());
+            dto.setLocation(restaurant.getLocation());
+            dto.setStyle(restaurant.getStyle());
+            dto.setCuisine(restaurant.getCuisine());
+            dto.setCost(restaurant.getCost());
+            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant.getId());
+            dto.setOverallRating(calculateAverageRating(reviews));
+            dto.setTotalReviews(reviews.size());
+            dto.setClientName(restaurant.getClient().getName());
+            dto.setStatus(String.valueOf(restaurant.getStatus()));
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    public Restaurant acceptStatus(Long id) {
         Optional<Restaurant> restaurantOptional = restaurantRepository.findById(id);
         if (restaurantOptional.isPresent()) {
             RestaurantStatus status = RestaurantStatus.ACCEPT;
@@ -122,7 +180,7 @@ public class RestaurantService {
         }
     }
 
-    public Restaurant updateRejectStatus(Long id) {
+    public Restaurant rejectStatus(Long id) {
         Optional<Restaurant> restaurantOptional = restaurantRepository.findById(id);
         if (restaurantOptional.isPresent()) {
             RestaurantStatus status = RestaurantStatus.REJECT;
@@ -132,51 +190,6 @@ public class RestaurantService {
         } else {
             throw new RuntimeException("Restaurant not found with id " + id);
         }
-    }
-
-    public List<Restaurant> getClientRestaurants(Long id) {
-        User client = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
-        return restaurantRepository.findByClient(client);
-    }
-
-    public Restaurant addRestaurant(RestaurantDTO restaurantDTO) {
-        User client = userRepository.findById(restaurantDTO.getClientUserId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
-
-        Restaurant restaurant = new Restaurant();
-        restaurant.setClient(client);
-        restaurant.setName(restaurantDTO.getName());
-        restaurant.setAddress(restaurantDTO.getAddress());
-        restaurant.setStyle(restaurantDTO.getStyle());
-        restaurant.setCuisine(restaurantDTO.getCuisine());
-        restaurant.setCost(restaurantDTO.getCost());
-        restaurant.setInformation(restaurantDTO.getInformation());
-        restaurant.setPhone(restaurantDTO.getPhone());
-        restaurant.setOpeningHours(restaurantDTO.getOpeningHours());
-        restaurant.setLocation(restaurantDTO.getLocation());
-        restaurant.setStatus(RestaurantStatus.PENDING);
-        return restaurantRepository.save(restaurant);
-    }
-
-    public List<RestaurantHomeDTO> getRestaurantDetailsAdmin() {
-        RestaurantStatus status = RestaurantStatus.ACCEPT;
-        List<Restaurant> restaurants = restaurantRepository.findByStatus(status);
-
-        return restaurants.stream().map(restaurant -> {
-            RestaurantHomeDTO dto = new RestaurantHomeDTO();
-            dto.setId(restaurant.getId());
-            dto.setName(restaurant.getName());
-            dto.setClientName(restaurant.getClient().getName());
-            dto.setLocation(restaurant.getLocation());
-            dto.setStyle(restaurant.getStyle());
-            dto.setCost(restaurant.getCost());
-            List<Review> reviews = reviewRepository.findByRestaurantId(restaurant);
-            dto.setOverallRating(calculateAverageRating(reviews));
-            dto.setTotalReviews(reviews.size());
-
-            return dto;
-        }).collect(Collectors.toList());
     }
 
     private double calculateAverageRating(List<Review> reviews) {

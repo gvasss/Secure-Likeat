@@ -5,11 +5,13 @@ import com.likeat.exception.UserNotFoundException;
 import com.likeat.model.Restaurant;
 import com.likeat.model.Review;
 import com.likeat.model.User;
+import com.likeat.request.ReviewRequest;
 import com.likeat.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -19,13 +21,13 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    @PostMapping("/")
+    @PostMapping()
     @PreAuthorize("hasAnyAuthority('review:create') or hasAnyRole('CLIENT')")
-    public Review addReview(@RequestBody ReviewDTO reviewDTO) {
-        return reviewService.addReview(reviewDTO);
+    public Review addReview(@RequestBody ReviewRequest newReview, Principal connectedUser) {
+        return reviewService.addReview(newReview, connectedUser);
     }
 
-    @GetMapping("/")
+    @GetMapping()
     @PreAuthorize("hasAnyRole('ADMIN')")
     public List<ReviewDTO> getAllReviews() {
         return reviewService.getAllReviews();
@@ -43,13 +45,13 @@ public class ReviewController {
         return reviewService.deleteReview(id);
     }
 
-    @GetMapping("/customer/{id}")
+    @GetMapping("/customer")
     @PreAuthorize("hasAnyAuthority('review:read') or hasAnyRole('CUSTOMER')")
-    public List<ReviewDTO> getCustomerReviews(@PathVariable Long id) {
-        return reviewService.getCustomerReviews(id);
+    public List<ReviewDTO> getCustomerReviews(Principal connectedUser) {
+        return reviewService.getCustomerReviews(connectedUser);
     }
 
-    @GetMapping("/{id}/reviews")
+    @GetMapping("/restaurant/{id}")
     @PreAuthorize("hasAnyAuthority('review:read') or hasAnyRole('CLIENT')")
     public List<ReviewDTO> getRestaurantReviews(@PathVariable Long id) {
         return reviewService.getRestaurantReviews(id);

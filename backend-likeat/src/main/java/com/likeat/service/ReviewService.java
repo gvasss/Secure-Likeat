@@ -8,10 +8,12 @@ import com.likeat.model.Review;
 import com.likeat.model.User;
 import com.likeat.repository.ReviewRepository;
 import com.likeat.repository.RestaurantRepository;
-import com.likeat.repository.UserRepository;
+import com.likeat.request.ReviewRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,21 +22,19 @@ import java.util.stream.Collectors;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
 
-    public Review addReview(ReviewDTO reviewDTO) {
-        User customer = userRepository.findById(reviewDTO.getCustomerUserId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    public Review addReview(ReviewRequest newReview, Principal connectedUser) {
+        var customer = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
-        Restaurant restaurant = restaurantRepository.findById(reviewDTO.getRestaurantId())
+        Restaurant restaurant = restaurantRepository.findById(newReview.getRestaurantId())
                 .orElseThrow(() -> new RuntimeException("Restaurant not found"));
 
         Review review = new Review(
                 null,
-                reviewDTO.getRating(),
-                reviewDTO.getDescription(),
-                reviewDTO.getDate(),
+                newReview.getRating(),
+                newReview.getDescription(),
+                new java.sql.Date(System.currentTimeMillis()),
                 customer,
                 restaurant
         );
@@ -46,12 +46,12 @@ public class ReviewService {
         return reviewRepository.findAll().stream()
                 .map(review -> {
                     ReviewDTO dto = new ReviewDTO();
+                    dto.setId(review.getId());
                     dto.setRating(review.getRating());
                     dto.setDescription(review.getDescription());
                     dto.setDate(review.getDate());
-                    dto.setCustomerUserId(review.getCustomer().getId());
-                    dto.setRestaurantId(review.getRestaurant().getId());
                     dto.setCustomerName(review.getCustomer().getName());
+                    dto.setRestaurantName(review.getRestaurant().getName());
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -61,11 +61,11 @@ public class ReviewService {
         return reviewRepository.findById(id)
                 .map(review -> {
                     ReviewDTO dto = new ReviewDTO();
+                    dto.setId(review.getId());
                     dto.setRating(review.getRating());
                     dto.setDescription(review.getDescription());
                     dto.setDate(review.getDate());
-                    dto.setCustomerUserId(review.getCustomer().getId());
-                    dto.setRestaurantId(review.getRestaurant().getId());
+                    dto.setRestaurantName(review.getRestaurant().getName());
                     dto.setCustomerName(review.getCustomer().getName());
                     return dto;
                 })
@@ -80,17 +80,16 @@ public class ReviewService {
         return "Review with id " + id + " deleted.";
     }
 
-    public List<ReviewDTO> getCustomerReviews(Long id) {
-        User customer = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+    public List<ReviewDTO> getCustomerReviews(Principal connectedUser) {
+        var customer = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
         return reviewRepository.findByCustomer(customer).stream()
                 .map(review -> {
                     ReviewDTO dto = new ReviewDTO();
                     dto.setRating(review.getRating());
                     dto.setDescription(review.getDescription());
                     dto.setDate(review.getDate());
-                    dto.setCustomerUserId(review.getCustomer().getId());
-                    dto.setRestaurantId(review.getRestaurant().getId());
+                    dto.setRestaurantName(review.getRestaurant().getName());
                     dto.setCustomerName(review.getCustomer().getName());
                     return dto;
                 })
@@ -100,14 +99,13 @@ public class ReviewService {
     public List<ReviewDTO> getRestaurantReviews(Long id) {
         Restaurant restaurant = restaurantRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
-        return reviewRepository.findByRestaurantId(restaurant).stream()
+        return reviewRepository.findByRestaurantId(restaurant.getId()).stream()
                 .map(review -> {
                     ReviewDTO dto = new ReviewDTO();
                     dto.setRating(review.getRating());
                     dto.setDescription(review.getDescription());
                     dto.setDate(review.getDate());
-                    dto.setCustomerUserId(review.getCustomer().getId());
-                    dto.setRestaurantId(review.getRestaurant().getId());
+                    dto.setRestaurantName(review.getRestaurant().getName());
                     dto.setCustomerName(review.getCustomer().getName());
                     return dto;
                 })

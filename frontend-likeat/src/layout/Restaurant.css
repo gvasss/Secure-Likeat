@@ -1,0 +1,27 @@
+.card-title.display-4 {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+.card-img-top {
+  height: 300px;
+  object-fit: cover;
+}
+
+.list-group-item {
+  border: none;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+}
+
+/* New CSS class for carousel images */
+.carousel-image {
+  width: 100%;
+  height: 350px;
+  object-fit: contain;
+  background-color: #e4e6e8;
+}

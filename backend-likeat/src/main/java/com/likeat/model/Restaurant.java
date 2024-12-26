@@ -3,17 +3,15 @@ package com.likeat.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 import java.util.stream.DoubleStream;
 
-@Entity
+@Data
+@Builder
 @AllArgsConstructor
-@Setter
-@Getter
+@Entity
 public class Restaurant {
 
     @Id
@@ -21,7 +19,7 @@ public class Restaurant {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "client_user_id", referencedColumnName = "id")
+    @JoinColumn(name = "client_id", referencedColumnName = "id")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
     private User client;
 
