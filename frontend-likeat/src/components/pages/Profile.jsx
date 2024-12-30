@@ -18,6 +18,7 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmationPassword, setConfirmationPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
@@ -77,7 +78,7 @@ const Profile = () => {
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);
-      }, 2500);
+      }, 3000);
 
       setCurrentPassword('');
       setNewPassword('');
@@ -94,6 +95,10 @@ const Profile = () => {
     setNewPassword('');
     setConfirmationPassword('');
     setPasswordError('');
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleDeleteModalClose = () => {
@@ -160,13 +165,26 @@ const Profile = () => {
             <Form.Floating className="mb-3">
               <Form.Control
                 id="currentPassword"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder=""
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
               />
               <label htmlFor="currentPassword">Current Password</label>
+              <span
+                className="password-toggle position-absolute"
+                onClick={togglePasswordVisibility}
+                style={{ 
+                    cursor: 'pointer',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    zIndex: 100
+                }}
+              >
+                <i className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}></i>
+              </span>
               <Form.Control.Feedback type="invalid">
                   Please enter your current password.
               </Form.Control.Feedback>

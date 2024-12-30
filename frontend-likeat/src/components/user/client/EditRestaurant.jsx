@@ -67,7 +67,7 @@ const EditRestaurant = () => {
             if (mainImage || additionalImages.length > 0) {
                 await addPhoto(id, mainImage, additionalImages);
             }
-            navigate("/clientrestaurant");
+            navigate("/client/restaurants");
         } catch (error) {
             console.error('Error submitting the form:', error.response ? error.response.data : error.message);
             setError(error.response ? error.response.data : error.message);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Form, Table, Button, Spinner } from 'react-bootstrap';
+import { Container, Form, Table, Button, Spinner, Alert } from 'react-bootstrap';
 import { getAllReviews, deleteReview } from '../../../services/reviews';
 
 const AdminReview = () => {
@@ -10,6 +10,10 @@ const AdminReview = () => {
     const [searchMonth, setSearchMonth] = useState('');
     const [searchCustomer, setSearchCustomer] = useState('');
     const [searchRestaurant, setSearchRestaurant] = useState('');
+
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertVariant, setAlertVariant] = useState('');
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -34,6 +38,12 @@ const AdminReview = () => {
         try {
             await deleteReview(id);
             setReviews((reviews) => reviews.filter(review => review.id !== id));
+            setAlertMessage('Review deleted successfully.');
+            setAlertVariant('success');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 3000);
         } catch (error) {
             setError('Error deleting review');
             console.error("There was an error deleting the review!", error);
@@ -99,6 +109,7 @@ const AdminReview = () => {
 
     return (
         <Container>
+            {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
             {error && <p className="alert alert-danger">{error}</p>}
             <div className='py-4'>
                 <Form className="row g-3" onSubmit={handleSearchSubmit}>

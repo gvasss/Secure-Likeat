@@ -44,7 +44,7 @@ const CustomerReview = () =>{
             <div className="col" key={`review-${review.id}-${index}`}>
               <Card className="text-center mx-auto text card-hover" style={{ maxWidth: '700px' }} border="dark">
                 <Card.Body>
-                  <h3 className="mb-4">Restaurant: {review.restaurantId.name}</h3>
+                  <h3 className="mb-4">Restaurant: {review.restaurantName}</h3>
                   <div className="mb-3">
                     <strong>Rating:</strong> <StarRating rating={review.rating} />
                   </div>

@@ -9,9 +9,9 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     if (!isUserAuthenticated()) {
-        navigate("/")
+      navigate("/")
     }
-})
+  })
 
   return isUserAuthenticated() ? children : "";
 }

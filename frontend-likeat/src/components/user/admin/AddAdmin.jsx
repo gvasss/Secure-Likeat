@@ -109,14 +109,20 @@ const AddAdmin = () => {
             />
             <label htmlFor="password">Password</label>
             <span
-              className="password-toggle"
+              className="password-toggle position-absolute"
               onClick={togglePasswordVisibility}
-              style={{ cursor: 'pointer' }}
+              style={{ 
+                cursor: 'pointer',
+                right: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 100
+              }}
             >
-              {showPassword ? "Hide password" : "Show password"}
+              <i className={`fas ${showPassword ? 'fa-eye' : 'fa-eye-slash'}`}></i>
             </span>
             <Form.Control.Feedback type="invalid">
-              Please enter a password.
+              Please enter your password.
             </Form.Control.Feedback>
           </Form.Floating>
           <Form.Floating className="mb-3">

@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Form, Table, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Form, Table, Button, Spinner, Alert } from 'react-bootstrap';
 import { getAdmins, deleteAdminById } from '../../../services/users';
 
 const AdminAdmin = () => {
   const [admins, setAdmins] = useState([]);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -30,6 +34,12 @@ const AdminAdmin = () => {
     try {
       await deleteAdminById(id);
       setAdmins((admins) => admins.filter(admin => admin.id !== id));
+      setAlertMessage('Admin deleted successfully.');
+      setAlertVariant('success');
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
     } catch (error) {
       setError('Error deleting admin');
       console.error("There was an error deleting the admin", error);
@@ -59,6 +69,7 @@ const AdminAdmin = () => {
 
   return (
     <Container>
+      {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
       {error && <p className="alert alert-danger">{error}</p>}
       <Row className="py-4">
         <Col>

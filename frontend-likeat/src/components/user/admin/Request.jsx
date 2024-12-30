@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Form, Table, Button, Spinner } from 'react-bootstrap';
+import { Container, Form, Table, Button, Spinner, Alert } from 'react-bootstrap';
 import { getAllRequest, acceptStatus, rejectStatus } from '../../../services/restaurants';
 
 const Request = () => {
     const [restaurants, setRestaurants] = useState([]);
+
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertVariant, setAlertVariant] = useState('');
 
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
@@ -30,6 +34,12 @@ const Request = () => {
         try {
             await acceptStatus(id);
             setRestaurants((restaurants) => restaurants.filter(restaurant => restaurant.id !== id));
+            setAlertMessage('Restaurant accepted successfully.');
+            setAlertVariant('success');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 3000);
         } catch (error) {
             setError('Error accepting restaurants');
             console.error("Error accepting restaurants", error);
@@ -40,6 +50,12 @@ const Request = () => {
         try {
             await rejectStatus(id);
             setRestaurants((restaurants) => restaurants.filter(restaurant => restaurant.id !== id));
+            setAlertMessage('Restaurant rejected successfully.');
+            setAlertVariant('success');
+            setShowAlert(true);
+            setTimeout(() => {
+                setShowAlert(false);
+            }, 3000);
         } catch (error) {
             setError('Error rejecting restaurants');
             console.error("Error rejecting restaurants", error);
@@ -68,6 +84,7 @@ const Request = () => {
 
     return (
         <Container>
+            {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
             {error && <p className="alert alert-danger">{error}</p>}
             <div className='py-4'>
                 <Form className="mb-3">

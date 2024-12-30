@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { createContext, useContext, useEffect, useState } from "react";
 import PropTypes from 'prop-types';
 import authentication from "../services/authentication.js";
@@ -36,7 +38,6 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     setUserFromToken()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const login = async (usernameAndPassword) => {
@@ -88,7 +89,6 @@ const AuthProvider = ({ children }) => {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
 AuthProvider.propTypes = {

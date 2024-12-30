@@ -167,3 +167,25 @@ html, body {
 .pagination-dark .page-link:focus {
   box-shadow: none;
 }
+
+/* */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  text-align: center;
+  background-color: #e4e6e8;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  padding-bottom: 2rem;
+}
+
+.footer {
+  flex-shrink: 0;
+  background-color: #343a40;
+  color: white;
+  padding: 1rem 0;
+  margin-top: auto;
+}

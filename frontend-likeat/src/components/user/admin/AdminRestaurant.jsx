@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Form, Table, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Form, Table, Button, Spinner, Alert } from 'react-bootstrap';
 import { getAllRestaurants, deleteRestaurant } from '../../../services/restaurants';
 
 const AdminRestaurant = () => {
   const [restaurants, setRestaurants] = useState([]);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -30,6 +34,12 @@ const AdminRestaurant = () => {
     try {
       await deleteRestaurant(id);
       setRestaurants((restaurants) => restaurants.filter(restaurant => restaurant.id !== id));
+      setAlertMessage('Restaurant deleted successfully.');
+      setAlertVariant('success');
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
     } catch (error) {
       setError('Error deleting restaurant');
       console.error("There was an error deleting the restaurant!", error);
@@ -63,6 +73,7 @@ const AdminRestaurant = () => {
 
   return (
     <Container>
+      {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
       {error && <p className="alert alert-danger">{error}</p>}
       <Row className="py-4">
         <Col>

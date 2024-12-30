@@ -1,10 +1,14 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Form, Table, Button, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Form, Table, Button, Spinner, Alert } from 'react-bootstrap';
 import { getClients, deleteClientById } from '../../../services/users';
 
 const AdminClient = () => {
   const [clients, setClients] = useState([]);
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertVariant, setAlertVariant] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -30,6 +34,12 @@ const AdminClient = () => {
     try {
       await deleteClientById(id);
       setClients((prevClients) => prevClients.filter(client => client.id !== id));
+      setAlertMessage('Client deleted successfully.');
+      setAlertVariant('success');
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
     } catch (error) {
       setError('Error deleting client:');
       console.error('Error deleting client:', error);
@@ -59,6 +69,7 @@ const AdminClient = () => {
 
   return (
     <Container>
+      {showAlert && <Alert variant={alertVariant}>{alertMessage}</Alert>}
       {error && <p className="alert alert-danger">{error}</p>}
       <Row className="py-4">
         <Col>

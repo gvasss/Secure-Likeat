@@ -13,7 +13,6 @@ const Register = ({ changeAuthMode, setShow }) => {
   const [surname, setSurname] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState('');
@@ -38,10 +37,6 @@ const Register = ({ changeAuthMode, setShow }) => {
     setValidated(false);
     setError(null);
     setShow(false);
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
 
   const handleRegister = async (event) => {
@@ -141,20 +136,13 @@ const Register = ({ changeAuthMode, setShow }) => {
         <Form.Floating className="mb-3">
             <Form.Control
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={"password"}
                 placeholder=""
                 value={password}
                 onChange={(password) => setPassword(password.target.value)}
                 required
             />
             <label htmlFor="password">Password</label>
-            <span
-                className="password-toggle"
-                onClick={togglePasswordVisibility}
-                style={{ cursor: 'pointer' }}
-            >
-                {showPassword ? "Hide password" : "Show password"}
-            </span>
             <Form.Control.Feedback type="invalid">
                 Please enter a password.
             </Form.Control.Feedback>

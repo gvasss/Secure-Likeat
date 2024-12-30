@@ -10,6 +10,7 @@ import ProtectedRoute from './misc/ProtectedRoute';
 // Components
 import Navbar from './layout/Navbar'
 import UpButton from './layout/UpButton';
+import Footer from './layout/Footer';
 
 // Public endpoints
 import Login from './components/login/SignInUp';
@@ -37,36 +38,38 @@ function App() {
   
   return (
     <AuthProvider>
-        <div className="App">
-            <Router>
-                <Navbar />        
-                  <Routes>
-                    {/* Public endpoints */}
-                    <Route path='/' element={<Home />} />
-                    <Route exact path="/login" element={<Login />} />
-                    {/* User endpoints */}
-                    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                    <Route path="/edituser/:id" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
-                    <Route path="/restaurant/:id" element={<ProtectedRoute><RestaurantDetail /></ProtectedRoute>} />
-                    {/* Client endpoints */}
-                    <Route path="/client/restaurants" element={<ProtectedRoute><ClientRestaurant /></ProtectedRoute>} />
-                    <Route path="/addrestaurant" element={<ProtectedRoute><AddRestaurant /></ProtectedRoute>} />
-                    <Route path="/editrestaurant/:id" element={<ProtectedRoute><EditRestaurant /></ProtectedRoute>} />
-                    <Route path="/viewrestaurant/:id" element={<ProtectedRoute><ViewRestaurant /></ProtectedRoute>} />
-                    <Route path="/restaurant/:id/reviews" element={<ProtectedRoute><ClientRestaurantReviews /></ProtectedRoute>} />
-                    {/* Customer endpoints */}
-                    <Route path="/customer/reviews" element={<ProtectedRoute><CustomerReview /></ProtectedRoute>} />
-                    <Route path="/addreview/:id" element={<ProtectedRoute><AddReview /></ProtectedRoute>} />
-                    {/* Customer endpoints */}
-                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                    <Route path="/viewuser/:id" element={<ProtectedRoute><ViewUser /></ProtectedRoute>} />
-                    <Route path="/addadmin" element={<ProtectedRoute><AddAdmin /></ProtectedRoute>} />
-                    <Route path="/viewreview/:id" element={<ProtectedRoute><ViewReview /></ProtectedRoute>} />
-
-                  </Routes>
-                <UpButton />
-            </Router>
-        </div>
+      <div className="app-container">
+        <Router>
+          <Navbar />   
+          <main className="main-content">     
+            <Routes>
+              {/* Public endpoints */}
+              <Route path='/' element={<Home />} />
+              <Route exact path="/login" element={<Login />} />
+              {/* User endpoints */}
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/edituser/:id" element={<ProtectedRoute><EditUser /></ProtectedRoute>} />
+              <Route path="/restaurant/:id" element={<ProtectedRoute><RestaurantDetail /></ProtectedRoute>} />
+              {/* Client endpoints */}
+              <Route path="/client/restaurants" element={<ProtectedRoute><ClientRestaurant /></ProtectedRoute>} />
+              <Route path="/addrestaurant" element={<ProtectedRoute><AddRestaurant /></ProtectedRoute>} />
+              <Route path="/editrestaurant/:id" element={<ProtectedRoute><EditRestaurant /></ProtectedRoute>} />
+              <Route path="/viewrestaurant/:id" element={<ProtectedRoute><ViewRestaurant /></ProtectedRoute>} />
+              <Route path="/restaurant/:id/reviews" element={<ProtectedRoute><ClientRestaurantReviews /></ProtectedRoute>} />
+              {/* Customer endpoints */}
+              <Route path="/customer/reviews" element={<ProtectedRoute><CustomerReview /></ProtectedRoute>} />
+              <Route path="/addreview/:id" element={<ProtectedRoute><AddReview /></ProtectedRoute>} />
+              {/* Customer endpoints */}
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/viewuser/:id" element={<ProtectedRoute><ViewUser /></ProtectedRoute>} />
+              <Route path="/addadmin" element={<ProtectedRoute><AddAdmin /></ProtectedRoute>} />
+              <Route path="/viewreview/:id" element={<ProtectedRoute><ViewReview /></ProtectedRoute>} />
+            </Routes>
+          </main>
+          <Footer />
+        </Router>
+        <UpButton />
+      </div>
     </AuthProvider>
   );
 }
