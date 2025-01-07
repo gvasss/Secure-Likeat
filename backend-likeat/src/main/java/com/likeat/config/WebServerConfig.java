@@ -20,7 +20,7 @@
 //                SecurityConstraint securityConstraint = new SecurityConstraint();
 //                securityConstraint.setUserConstraint("CONFIDENTIAL");
 //                SecurityCollection collection = new SecurityCollection();
-//                collection.addPattern("/api/likeat/*");
+//                collection.addPattern("/likeat/*");
 //                securityConstraint.addCollection(collection);
 //                context.addConstraint(securityConstraint);
 //            }
