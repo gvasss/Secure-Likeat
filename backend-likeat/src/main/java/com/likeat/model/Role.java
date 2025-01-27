@@ -53,7 +53,7 @@ public enum Role {
                     RESTAURANT_DELETE,
                     REVIEW_READ
             )
-  );
+    );
 
     @Getter
     private final Set<Permission> permissions;

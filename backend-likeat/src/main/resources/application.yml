@@ -17,17 +17,6 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     open-in-view: true
     generate-ddl: true
-  ssl:
-    bundle:
-      jks:
-        web-server:
-          key:
-            alias: "server"
-            password: "password"
-          keystore:
-            location: classpath:server.p12
-            password: "password"
-            type: "PKCS12"
 
 app:
   cors:
@@ -42,7 +31,8 @@ application:
 server:
   port: 8443
   ssl:
-    enabled: true
+    key-alias: server
     key-store: classpath:server.p12
     key-store-password: password
     key-store-type: PKCS12
+    key-password: password

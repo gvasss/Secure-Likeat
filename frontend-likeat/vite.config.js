@@ -17,8 +17,5 @@ export default defineConfig({
       key: fs.readFileSync(path.resolve(__dirname, 'server.key'), 'utf8'),
       cert: fs.readFileSync(path.resolve(__dirname, 'server.cer'), 'utf8')
     }
-  // https: {
-  //   key: fs.readFileSync(path.resolve(__dirname, 'localhost-key.pem'), 'utf8'),
-  //   cert: fs.readFileSync(path.resolve(__dirname, 'localhost.pem'), 'utf8')
   }
 })
