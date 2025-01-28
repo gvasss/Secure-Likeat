@@ -6,6 +6,7 @@ import Customer from './AdminCustomer';
 import Restaurant from './AdminRestaurant';
 import Request from './Request';
 import Review from './AdminReview';
+import Logs from './Logs';
 import '../../../layout/Dashboard.css';
 
 const Dashboard = () => {
@@ -35,6 +36,7 @@ const Dashboard = () => {
                         </Card.Header>
                         <Card.Body>
                             <nav className="dashboard-side-nav">
+                                <Button className={`nav-link btn btn-dark ${activeTab === 'Logs' ? 'active' : ''}`} onClick={() => handleTabChange('Logs')}>Logs</Button>
                                 <Button className={`nav-link btn btn-dark ${activeTab === 'Admins' ? 'active' : ''}`} onClick={() => handleTabChange('Admins')}>Admins</Button>
                                 <Button className={`nav-link btn btn-dark ${activeTab === 'Clients' ? 'active' : ''}`} onClick={() => handleTabChange('Clients')}>Clients</Button>
                                 <Button className={`nav-link btn btn-dark ${activeTab === 'Customers' ? 'active' : ''}`} onClick={() => handleTabChange('Customers')}>Customers</Button>
@@ -52,6 +54,7 @@ const Dashboard = () => {
                             {activeTab}
                         </Card.Header>
                         <Card.Body>
+                            {activeTab === 'Logs' && <Logs />}
                             {activeTab === 'Admins' && <Admin />}
                             {activeTab === 'Clients' && <Client />}
                             {activeTab === 'Customers' && <Customer />}

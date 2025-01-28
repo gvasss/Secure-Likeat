@@ -100,7 +100,7 @@ const Register = ({ changeAuthMode, setShow }) => {
                 onChange={(name) => setName(name.target.value)}
                 required
             />
-            <label htmlFor="name">Full Name</label>
+            <label htmlFor="name">Name</label>
             <Form.Control.Feedback type="invalid">
                 Please enter your name.
             </Form.Control.Feedback>

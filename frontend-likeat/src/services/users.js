@@ -54,6 +54,15 @@ export const getCustomers = async () => {
   return response.data
 }
 
+export const getLogs = async () => {
+  try {
+    const response = await axios.get(`${baseUrl}/logs`, getAuthConfig())
+    return response.data
+  } catch (error) {
+    return error.response ? error.response.data : error.message
+  }
+}
+
 // Dashboard Delete
 export const deleteAdminById = async (id) => {
   const response = await axios.delete(`${baseUrl}/admin/${id}`, getAuthConfig())

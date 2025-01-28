@@ -44,20 +44,12 @@ public class Review {
     )
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
-    @Column(insertable = false)
-    private LocalDateTime updatedAt;
-
     @CreatedBy
     @Column(
             nullable = false,
             updatable = false
     )
     private Long createdBy;
-
-    @LastModifiedBy
-    @Column(insertable = false)
-    private Long lastModifiedBy;
 
     public Review(Long id, int rating, String description, Date date, User customer, Restaurant restaurant) {
         this.id = id;

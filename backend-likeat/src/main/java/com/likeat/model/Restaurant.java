@@ -64,7 +64,7 @@ public class Restaurant {
 
     @LastModifiedBy
     @Column(insertable = false)
-    private Long lastModifiedBy;
+    private Long updatedBy;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

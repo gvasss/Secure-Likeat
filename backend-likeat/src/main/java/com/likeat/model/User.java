@@ -57,7 +57,7 @@ public class User implements UserDetails {
 
     @LastModifiedBy
     @Column(insertable = false)
-    private Long lastModifiedBy;
+    private Long updatedBy;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

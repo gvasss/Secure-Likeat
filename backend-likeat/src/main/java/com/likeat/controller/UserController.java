@@ -1,5 +1,6 @@
 package com.likeat.controller;
 
+import com.likeat.dto.AllEntitiesDTO;
 import com.likeat.dto.UserDTO;
 import com.likeat.request.ChangePasswordRequest;
 import com.likeat.request.UpdateUserRequest;
@@ -105,5 +106,11 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN')")
     public UserDTO getUserById(@Valid @PathVariable Long id) {
         return service.getUserById(id);
+    }
+
+    @GetMapping("/logs")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<AllEntitiesDTO> getLogs() {
+        return ResponseEntity.ok(service.getLogs());
     }
 }

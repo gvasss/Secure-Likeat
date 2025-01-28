@@ -1,6 +1,6 @@
 package com.likeat.service;
 
-import com.likeat.dto.UserDTO;
+import com.likeat.dto.*;
 import com.likeat.exception.UserNotFoundException;
 import com.likeat.exception.WrongPasswordException;
 import com.likeat.model.Restaurant;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -225,5 +226,86 @@ public class UserService {
 
         userRepository.deleteById(id);
         return "Customer with id " + id + " and their reviews deleted.";
+    }
+
+    public AllEntitiesDTO getLogs() {
+        List<UserInfoDTO> users = userRepository.findAll().stream()
+                .flatMap(user -> {
+                    if (user.getUpdatedAt() != null && user.getUpdatedBy() != null) {
+                        return Stream.of(
+                                new UserInfoDTO(
+                                        "create",
+                                        user.getCreatedAt(),
+                                        user.getUsername(),
+                                        user.getRole().name()
+                                ),
+                                new UserInfoDTO(
+                                        "update",
+                                        user.getUpdatedAt(),
+                                        user.getUsername(),
+                                        user.getRole().name()
+                                )
+                        );
+                    }
+                    return Stream.of(
+                            new UserInfoDTO(
+                                    "create",
+                                    user.getCreatedAt(),
+                                    user.getUsername(),
+                                    user.getRole().name()
+                            )
+                    );
+                })
+                .collect(Collectors.toList());
+
+        List<ReviewInfoDTO> reviews = reviewRepository.findAll().stream()
+                .map(review -> new ReviewInfoDTO(
+                        "create",
+                        review.getCreatedAt(),
+                        review.getId(),
+                        getUsernameById(review.getCreatedBy()),
+                        review.getRestaurant().getName()
+                ))
+                .collect(Collectors.toList());
+
+        List<RestaurantInfoDTO> restaurants = restaurantRepository.findAll().stream()
+                .flatMap(restaurant -> {
+                    if (restaurant.getUpdatedAt() != null && restaurant.getUpdatedBy() != null) {
+                        return Stream.of(
+                                new RestaurantInfoDTO(
+                                        "create",
+                                        restaurant.getCreatedAt(),
+                                        restaurant.getCreatedBy(),
+                                        getUsernameById(restaurant.getCreatedBy()),
+                                        restaurant.getName()
+                                ),
+                                new RestaurantInfoDTO(
+                                        "update",
+                                        restaurant.getUpdatedAt(),
+                                        restaurant.getUpdatedBy(),
+                                        getUsernameById(restaurant.getUpdatedBy()),
+                                        restaurant.getName()
+                                )
+                        );
+                    }
+                    return Stream.of(
+                            new RestaurantInfoDTO(
+                                    "create",
+                                    restaurant.getCreatedAt(),
+                                    restaurant.getCreatedBy(),
+                                    getUsernameById(restaurant.getCreatedBy()),
+                                    restaurant.getName()
+                            )
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new AllEntitiesDTO(users, reviews, restaurants);
+    }
+
+    private String getUsernameById(Long userId) {
+        return userRepository.findById(userId)
+                .map(User::getUsername)
+                .orElse("Unknown");
     }
 }
