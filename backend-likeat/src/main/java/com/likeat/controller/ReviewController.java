@@ -7,6 +7,7 @@ import com.likeat.model.Review;
 import com.likeat.model.User;
 import com.likeat.request.ReviewRequest;
 import com.likeat.service.ReviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class ReviewController {
 
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('review:create') or hasAnyRole('CLIENT')")
-    public Review addReview(@RequestBody ReviewRequest newReview, Principal connectedUser) {
+    public Review addReview(@Valid @RequestBody ReviewRequest newReview, Principal connectedUser) {
         return reviewService.addReview(newReview, connectedUser);
     }
 
@@ -35,13 +36,13 @@ public class ReviewController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('review:read') or hasAnyRole('CUSTOMER', 'ADMIN')")
-    public ReviewDTO getReviewById(@PathVariable Long id) {
+    public ReviewDTO getReviewById(@Valid @PathVariable Long id) {
         return reviewService.getReviewById(id);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('review:delete') or hasAnyRole('CUSTOMER', 'ADMIN')")
-    public String deleteReview(@PathVariable Long id) {
+    public String deleteReview(@Valid @PathVariable Long id) {
         return reviewService.deleteReview(id);
     }
 
@@ -53,7 +54,7 @@ public class ReviewController {
 
     @GetMapping("/restaurant/{id}")
     @PreAuthorize("hasAnyAuthority('review:read') or hasAnyRole('CLIENT')")
-    public List<ReviewDTO> getRestaurantReviews(@PathVariable Long id) {
+    public List<ReviewDTO> getRestaurantReviews(@Valid @PathVariable Long id) {
         return reviewService.getRestaurantReviews(id);
     }
 }

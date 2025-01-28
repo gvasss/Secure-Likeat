@@ -4,6 +4,7 @@ import com.likeat.dto.RestaurantDTO;
 import com.likeat.model.Restaurant;
 import com.likeat.request.RestaurantRequest;
 import com.likeat.service.RestaurantService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,20 +27,20 @@ public class RestaurantController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('resturant:read') or hasAnyRole('CUSTOMER', 'CLIENT', 'ADMIN')")
-    public RestaurantDTO getRestaurant(@PathVariable Long id) {
+    public RestaurantDTO getRestaurant(@Valid @PathVariable Long id) {
         return restaurantService.getRestaurant(id);
     }
 
     // Client endpoints
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('resturant:update') or hasAnyRole('CLIENT')")
-    public Restaurant updatedRestaurant(@PathVariable Long id, @RequestBody RestaurantRequest updatedRestaurant) {
+    public Restaurant updatedRestaurant(@Valid @PathVariable Long id, @Valid @RequestBody RestaurantRequest updatedRestaurant) {
         return restaurantService.updateRestaurant(id, updatedRestaurant);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('resturant:delete') or hasAnyRole('CLIENT', 'ADMIN')")
-    public String deleteRestaurant(@PathVariable Long id) {
+    public String deleteRestaurant(@Valid @PathVariable Long id) {
         return restaurantService.deleteRestaurant(id);
     }
 
@@ -51,7 +52,7 @@ public class RestaurantController {
 
     @PostMapping()
     @PreAuthorize("hasAnyAuthority('resturant:create') or hasAnyRole('CLIENT')")
-    public Long addRestaurant(@RequestBody RestaurantRequest newRestaurant, Principal connectedUser) {
+    public Long addRestaurant(@Valid @RequestBody RestaurantRequest newRestaurant, Principal connectedUser) {
         return restaurantService.addRestaurant(newRestaurant, connectedUser);
     }
 
@@ -64,13 +65,13 @@ public class RestaurantController {
 
     @PutMapping("/{id}/statusAccept")
     @PreAuthorize("hasAnyAuthority('resturant:update') or hasAnyRole('ADMIN')")
-    public Restaurant acceptStatus(@PathVariable Long id) {
+    public Restaurant acceptStatus(@Valid @PathVariable Long id) {
         return restaurantService.acceptStatus(id);
     }
 
     @PutMapping("/{id}/statusReject")
     @PreAuthorize("hasAnyAuthority('resturant:update') or hasAnyRole('ADMIN')")
-    public Restaurant rejectStatus(@PathVariable Long id) {
+    public Restaurant rejectStatus(@Valid @PathVariable Long id) {
         return restaurantService.rejectStatus(id);
     }
 }

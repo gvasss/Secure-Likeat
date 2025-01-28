@@ -4,6 +4,7 @@ import com.likeat.dto.UserDTO;
 import com.likeat.request.ChangePasswordRequest;
 import com.likeat.request.UpdateUserRequest;
 import com.likeat.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,14 +29,14 @@ public class UserController {
 
     @PutMapping("/update")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'CLIENT', 'ADMIN')")
-    public ResponseEntity<?> updateUser(@RequestBody UpdateUserRequest request, Principal connectedUser) {
+    public ResponseEntity<?> updateUser(@Valid @RequestBody UpdateUserRequest request, Principal connectedUser) {
         service.updateUser(request, connectedUser);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/change-password")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'CLIENT', 'ADMIN')")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Principal connectedUser) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request, Principal connectedUser) {
         service.changePassword(request, connectedUser);
         return ResponseEntity.ok().build();
     }
@@ -83,26 +84,26 @@ public class UserController {
         //dashboard delete
     @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasAuthority('admin:delete')")
-    public String deleteAdmin(@PathVariable Long id) {
+    public String deleteAdmin(@Valid @PathVariable Long id) {
         return service.deleteAdmin(id);
     }
 
     @DeleteMapping("/client/{id}")
     @PreAuthorize("hasAuthority('client:delete')")
-    public String deleteClient(@PathVariable Long id) {
+    public String deleteClient(@Valid @PathVariable Long id) {
         return service.deleteClient(id);
     }
 
     @DeleteMapping("/customer/{id}")
     @PreAuthorize("hasAuthority('customer:delete')")
-    public String deleteCustomer(@PathVariable Long id) {
+    public String deleteCustomer(@Valid @PathVariable Long id) {
         return service.deleteCustomer(id);
     }
 
         // dashboard details
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN')")
-    public UserDTO getUserById(@PathVariable Long id) {
+    public UserDTO getUserById(@Valid @PathVariable Long id) {
         return service.getUserById(id);
     }
 }

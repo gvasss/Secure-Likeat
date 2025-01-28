@@ -1,6 +1,7 @@
 package com.likeat.controller;
 
 import com.likeat.service.PhotoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +30,7 @@ public class PhotoController {
 
     @DeleteMapping("/{photoId}")
     @PreAuthorize("hasAnyAuthority('restarant:delete') or hasAnyRole('CLIENT')")
-    public ResponseEntity<Void> deletePhoto(@PathVariable Long photoId) {
+    public ResponseEntity<Void> deletePhoto(@Valid @PathVariable Long photoId) {
         photoService.deletePhoto(photoId);
         return ResponseEntity.noContent().build();
     }

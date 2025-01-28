@@ -1,16 +1,22 @@
 package com.likeat.model;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 public class Review {
 
     @Id
@@ -30,4 +36,35 @@ public class Review {
     @JoinColumn(name = "restaurant_id", referencedColumnName = "id")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
     private Restaurant restaurant;
+
+    @CreatedDate
+    @Column(
+            nullable = false,
+            updatable = false
+    )
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(insertable = false)
+    private LocalDateTime updatedAt;
+
+    @CreatedBy
+    @Column(
+            nullable = false,
+            updatable = false
+    )
+    private Long createdBy;
+
+    @LastModifiedBy
+    @Column(insertable = false)
+    private Long lastModifiedBy;
+
+    public Review(Long id, int rating, String description, Date date, User customer, Restaurant restaurant) {
+        this.id = id;
+        this.rating = rating;
+        this.description = description;
+        this.date = date;
+        this.customer = customer;
+        this.restaurant = restaurant;
+    }
 }

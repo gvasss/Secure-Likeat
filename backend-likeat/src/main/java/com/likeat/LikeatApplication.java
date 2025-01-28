@@ -1,19 +1,15 @@
 package com.likeat;
 
-import com.likeat.auth.RegisterRequest;
-import com.likeat.service.AuthenticationService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import static com.likeat.model.Role.*;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-public class DemoApplication {
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
+public class LikeatApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+        SpringApplication.run(LikeatApplication.class, args);
     }
 
 //    @Bean
