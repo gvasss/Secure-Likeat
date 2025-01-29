@@ -1,6 +1,7 @@
 import { useEffect, useState, Fragment } from 'react';
 import { Container, Row, Col, Table, Spinner, Form } from 'react-bootstrap';
 import { getLogs } from '../../../services/users';
+import { format } from 'date-fns';
 
 const Logs = () => {
   const [logs, setLogs] = useState([]);
@@ -16,9 +17,9 @@ const Logs = () => {
       try {
         const data = await getLogs();
         const combinedLogs = [
-          ...data.users.map(log => ({ ...log, type: 'User' })),
-          ...data.reviews.map(log => ({ ...log, type: 'Review' })),
-          ...data.restaurants.map(log => ({ ...log, type: 'Restaurant' }))
+          ...data.users.map(log => ({ ...log, content: 'User' })),
+          ...data.reviews.map(log => ({ ...log, content: 'Review' })),
+          ...data.restaurants.map(log => ({ ...log, content: 'Restaurant' }))
         ];
         const sortedLogs = combinedLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
         setLogs(sortedLogs);
@@ -35,6 +36,7 @@ const Logs = () => {
   useEffect(() => {
     const filtered = logs.filter(log =>
       log.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.username.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredLogs(filtered);
@@ -54,9 +56,12 @@ const Logs = () => {
     <Fragment key={index}>
       <tr>
         <td>{index + 1}</td>
-        <td>{`Type: ${log.type}, Date: ${log.date}, ${log.type === 'User' ? `Username: ${log.username}, Role: ${log.role}` 
-          : log.type === 'Review' ? `Review ID: ${log.reviewId}, Created By: ${log.username}, Restaurant Name: ${log.restaurant}` 
-          : `User ID: ${log.userId}, Username: ${log.username}, Restaurant Name: ${log.restaurant}`}`}</td>
+        <td>
+          {`Type: ${log.type}, Content: ${log.content}, Date: ${format(new Date(log.date), 'dd-MM-yyyy HH:mm:ss')}, 
+          ${log.content === 'User' ? `Username: ${log.username}, Role: ${log.role}` 
+          : log.content === 'Review' ? `Review ID: ${log.reviewId}, Created By: ${log.username}, Restaurant Name: ${log.restaurant}` 
+          : `User ID: ${log.userId}, Username: ${log.username}, Restaurant Name: ${log.restaurant}`}`}
+        </td>
       </tr>
     </Fragment>
   );
@@ -69,7 +74,7 @@ const Logs = () => {
         <Form className="mb-3">
             <Form.Control
               type="search"
-              placeholder="Search by Type or Username"
+              placeholder="Search by Type or Content or Username"
               aria-label="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

@@ -16,6 +16,8 @@ const Register = ({ changeAuthMode, setShow }) => {
 
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const Auth = useAuth();
   const setUserFromToken = Auth.setUserFromToken;
@@ -49,6 +51,13 @@ const Register = ({ changeAuthMode, setShow }) => {
       return;
     }
 
+    if (!validatePassword(password)) {
+      setPasswordError('Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
+      return;
+    } else {
+      setPasswordError('');
+    }
+
     const user = { username, password, name, surname, email, role };
     if (password !== confirmPassword) {
         setError('Passwords do not match');
@@ -65,6 +74,11 @@ const Register = ({ changeAuthMode, setShow }) => {
     } catch {
       setError('Register failed. Please try again.');
     }
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
   };
 
   return (
@@ -177,6 +191,26 @@ const Register = ({ changeAuthMode, setShow }) => {
                 Please select a role.
             </Form.Control.Feedback>
         </Form.Floating>
+        <Form.Group className="mb-3" controlId="terms">
+        <Form.Check
+          type="checkbox"
+          label={
+            <>
+              I accept the{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer">
+                terms and conditions
+              </a>
+            </>
+          }
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          required
+        />
+        <Form.Control.Feedback type="invalid">
+          You must accept the terms and conditions.
+        </Form.Control.Feedback>
+      </Form.Group>
+        {passwordError && <Alert variant="danger">{passwordError}</Alert>}
         {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
         <div className="d-grid gap-2 mt-3">
             <Button type="submit" variant="dark">

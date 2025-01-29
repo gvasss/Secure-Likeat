@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Button, Container } from 'react-bootstrap';
+import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { addRestaurant } from '../../../services/restaurants';
 import { addPhoto } from '../../../services/photos';
 
@@ -20,6 +20,7 @@ export default function AddRestaurant() {
 
   const [validated, setValidated] = useState(false);
   const [error, setError] = useState(null);
+  const [phoneError, setPhoneError] = useState('');
   const navigate = useNavigate();
 
   const onMainImageChange = (e) => {
@@ -40,6 +41,13 @@ export default function AddRestaurant() {
       return;
     }
 
+    if (!validatePhone(phone)) {
+      setPhoneError('Please enter a valid phone number.');
+      return;
+    } else {
+      setPhoneError('');
+    }
+
     const restaurant = { name, address, style, cuisine, cost, information, phone, openingHours, location };
     try {
       const restaurantId = await addRestaurant(restaurant);
@@ -52,6 +60,11 @@ export default function AddRestaurant() {
     } catch (error) {
       setError(error.response ? error.response.data : error.message);
     }
+  };
+  
+  const validatePhone = (phone) => {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone);
   };
 
   return (
@@ -160,6 +173,7 @@ export default function AddRestaurant() {
             <Form.Control.Feedback type="invalid">
               Please enter a phone number.
             </Form.Control.Feedback>
+            
           </Form.Floating>
           <Form.Floating className="mb-3">
             <Form.Control
@@ -203,6 +217,7 @@ export default function AddRestaurant() {
           </Form.Group>
 
           {error && <p className="alert alert-danger">{error}</p>}
+          {phoneError && <Alert variant="danger">{phoneError}</Alert>}
           <Button variant="danger" onClick={() => window.history.back()}>
             Cancel
           </Button>{' '}

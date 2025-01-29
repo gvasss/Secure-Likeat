@@ -91,7 +91,7 @@ const RestaurantDetail = () => {
             <Card.Title className="display-4">{restaurant.name}</Card.Title>
             <div className="mb-4">
               <StarRating rating={restaurant.overallRating} />
-              <p>{restaurant.overallRating}</p>
+              <p>{restaurant.overallRating.toFixed(1)}</p>
             </div>
           </div>
         </Row>
