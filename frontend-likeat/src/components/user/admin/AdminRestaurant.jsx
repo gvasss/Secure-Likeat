@@ -14,6 +14,9 @@ const AdminRestaurant = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const restaurantsPerPage = 10;
+
   useEffect(() => {
     fetchRestaurants();
   }, []);
@@ -61,6 +64,15 @@ const AdminRestaurant = () => {
     e.preventDefault();
   };
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+  
+  const indexOfLastRestaurant = currentPage * restaurantsPerPage;
+  const indexOfFirstRestaurant = indexOfLastRestaurant - restaurantsPerPage;
+  const currentRestaurnats = filteredRestaurants.slice(indexOfFirstRestaurant, indexOfLastRestaurant);
+  const totalPages = Math.ceil(filteredRestaurants.length / restaurantsPerPage);
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -103,7 +115,7 @@ const AdminRestaurant = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredRestaurants.map((restaurant, index) => (
+              {currentRestaurnats.map((restaurant, index) => (
                 <tr key={restaurant.id}>
                   <td>{index+1}</td>
                   <td>{restaurant.id}</td>
@@ -113,7 +125,7 @@ const AdminRestaurant = () => {
                   <td>{restaurant.location}</td>
                   <td>{restaurant.cost}</td>
                   <td>{restaurant.totalReviews}</td>
-                  <td>{restaurant.overallRating}</td>
+                  <td>{restaurant.overallRating.toFixed(1)}</td>
                   <td>
                     <Link className="btn btn-dark mx-2" to={`/viewrestaurant/${restaurant.id}`}>
                       <i className="fas fa-eye"></i> View
@@ -126,6 +138,28 @@ const AdminRestaurant = () => {
               ))}
             </tbody>
           </Table>
+
+          <nav aria-label="Page navigation example">
+            <ul className="pagination justify-content-center pagination-dark">
+              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(currentPage - 1)} aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </button>
+              </li>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <li key={index + 1} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                  <button className="page-link" onClick={() => handlePageChange(index + 1)}>
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(currentPage + 1)} aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
 
         </Col>
       </Row>

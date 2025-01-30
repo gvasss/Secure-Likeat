@@ -14,6 +14,9 @@ const AdminClient = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const clientsPerPage = 10;
+
   useEffect(() => {
     fetchClients();
   }, []);
@@ -56,6 +59,14 @@ const AdminClient = () => {
     setSearchQuery(e.target.value);
   }, []);
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+  
+  const indexOfLastClient = currentPage * clientsPerPage;
+  const indexOfFirstClient = indexOfLastClient - clientsPerPage;
+  const currentClients = filteredClients.slice(indexOfFirstClient, indexOfLastClient);
+  const totalPages = Math.ceil(filteredClients.length / clientsPerPage);
 
   if (loading) {
     return (
@@ -96,7 +107,7 @@ const AdminClient = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map((client, index) => (
+              {currentClients.map((client, index) => (
                 <tr key={client.id}>
                   <td>{index+1}</td>
                   <td>{client.id}</td>
@@ -116,6 +127,28 @@ const AdminClient = () => {
               ))}
             </tbody>
           </Table>
+
+          <nav aria-label="Page navigation example">
+            <ul className="pagination justify-content-center pagination-dark">
+              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(currentPage - 1)} aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </button>
+              </li>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <li key={index + 1} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                  <button className="page-link" onClick={() => handlePageChange(index + 1)}>
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(currentPage + 1)} aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
 
         </Col>
       </Row>

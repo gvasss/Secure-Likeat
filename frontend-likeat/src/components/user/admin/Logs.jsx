@@ -12,6 +12,9 @@ const Logs = () => {
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const logsPerPage = 10;
+
   useEffect(() => {
     const fetchLogs = async () => {
       try {
@@ -42,6 +45,30 @@ const Logs = () => {
     setFilteredLogs(filtered);
   }, [searchQuery, logs]);
 
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const indexOfLastLog = currentPage * logsPerPage;
+  const indexOfFirstLog = indexOfLastLog - logsPerPage;
+  const currentLogs = filteredLogs.slice(indexOfFirstLog, indexOfLastLog);
+  const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+
+  const renderLogEntry = (log, index) => (
+    <Fragment key={index}>
+      <tr>
+        <td>{log.type}</td>
+        <td>{format(new Date(log.date), 'dd/MM/yyyy HH:mm:ss')}</td>
+        <td>{log.content}</td>
+        <td>
+          {log.content === 'User' ? `Username: ${log.username}, Role: ${log.role}` 
+          : log.content === 'Review' ? `Review ID: ${log.reviewId}, Created By: ${log.username}, Restaurant Name: ${log.restaurant}` 
+          : `User ID: ${log.userId}, Username: ${log.username}, Restaurant Name: ${log.restaurant}`}
+        </td>
+      </tr>
+    </Fragment>
+  );
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -51,20 +78,6 @@ const Logs = () => {
       </div>
     );
   }
-
-  const renderLogEntry = (log, index) => (
-    <Fragment key={index}>
-      <tr>
-        <td>{index + 1}</td>
-        <td>
-          {`Type: ${log.type}, Content: ${log.content}, Date: ${format(new Date(log.date), 'dd-MM-yyyy HH:mm:ss')}, 
-          ${log.content === 'User' ? `Username: ${log.username}, Role: ${log.role}` 
-          : log.content === 'Review' ? `Review ID: ${log.reviewId}, Created By: ${log.username}, Restaurant Name: ${log.restaurant}` 
-          : `User ID: ${log.userId}, Username: ${log.username}, Restaurant Name: ${log.restaurant}`}`}
-        </td>
-      </tr>
-    </Fragment>
-  );
 
   return (
     <Container>
@@ -84,14 +97,38 @@ const Logs = () => {
           <Table striped bordered hover responsive>
             <thead className="table-dark">
               <tr>
-                <th>#</th>
-                <th>Log Entry</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Content</th>
+                <th>Logs entry</th>
               </tr>
             </thead>
             <tbody>
-              {filteredLogs.map((log, index) => renderLogEntry(log, index))}
+              {currentLogs.map((log, index) => renderLogEntry(log, index))}
             </tbody>
           </Table>
+
+          <nav aria-label="Page navigation example">
+            <ul className="pagination justify-content-center pagination-dark">
+              <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(currentPage - 1)} aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </button>
+              </li>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <li key={index + 1} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                  <button className="page-link" onClick={() => handlePageChange(index + 1)}>
+                    {index + 1}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                <button className="page-link" onClick={() => handlePageChange(currentPage + 1)} aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
 
         </Col>
       </Row>

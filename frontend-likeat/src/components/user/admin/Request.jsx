@@ -14,6 +14,9 @@ const Request = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const requestsPerPage = 10;
+
     useEffect(() => {
         fetchRestaurants();
     },[])
@@ -63,7 +66,7 @@ const Request = () => {
     };
 
     //search
-    const filteredRestaurants = restaurants.filter(restaurant => {
+    const filteredRequests = restaurants.filter(restaurant => {
         const nameMatch = restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
         const locationMatch = restaurant.location.toLowerCase().includes(searchQuery.toLowerCase());
         return nameMatch || locationMatch;
@@ -71,6 +74,15 @@ const Request = () => {
     const handleSearch = (e) => {
         setSearchQuery(e.target.value);
     };
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const indexOfLastRequest = currentPage * requestsPerPage;
+    const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
+    const currentRequests = filteredRequests.slice(indexOfFirstRequest, indexOfLastRequest);
+    const totalPages = Math.ceil(filteredRequests.length / requestsPerPage);
 
     if (loading) {
         return (
@@ -110,7 +122,7 @@ const Request = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredRestaurants.map((restaurant, index) => (
+                        {currentRequests.map((restaurant, index) => (
                             <tr key={restaurant.id}>
                                 <td>{index+1}</td>
                                 <td>{restaurant.id}</td>
@@ -133,6 +145,29 @@ const Request = () => {
                         ))}
                     </tbody>
                 </Table>
+
+                <nav aria-label="Page navigation example">
+                    <ul className="pagination justify-content-center pagination-dark">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                        <button className="page-link" onClick={() => handlePageChange(currentPage - 1)} aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                        </button>
+                    </li>
+                    {Array.from({ length: totalPages }, (_, index) => (
+                        <li key={index + 1} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                        <button className="page-link" onClick={() => handlePageChange(index + 1)}>
+                            {index + 1}
+                        </button>
+                        </li>
+                    ))}
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                        <button className="page-link" onClick={() => handlePageChange(currentPage + 1)} aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                        </button>
+                    </li>
+                    </ul>
+                </nav>
+
             </div>
         </Container>
     );

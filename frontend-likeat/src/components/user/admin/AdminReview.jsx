@@ -18,6 +18,9 @@ const AdminReview = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const reviewsPerPage = 10;
+
     useEffect(() => {
         fetchReviews();
     }, [])
@@ -97,6 +100,15 @@ const AdminReview = () => {
         return matchesDay && matchesMonth && matchesCustomer && matchesRestaurant;
     });
 
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+      };
+      
+    const indexOfLastReview = currentPage * reviewsPerPage;
+    const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+    const currentReviews = filteredReviews.slice(indexOfFirstReview, indexOfLastReview);
+    const totalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+
     if (loading) {
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -166,7 +178,7 @@ const AdminReview = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredReviews.map((review, index) => (
+                    {currentReviews.map((review, index) => (
                         <tr key={`review-${review.id}-${index}`}>
                             <td>{index+1}</td>
                             <td>{review.id}</td>
@@ -187,6 +199,28 @@ const AdminReview = () => {
                     ))}
                 </tbody>
             </Table>
+
+            <nav aria-label="Page navigation example">
+                <ul className="pagination justify-content-center pagination-dark">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <button className="page-link" onClick={() => handlePageChange(currentPage - 1)} aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    </button>
+                </li>
+                {Array.from({ length: totalPages }, (_, index) => (
+                    <li key={index + 1} className={`page-item ${index + 1 === currentPage ? 'active' : ''}`}>
+                    <button className="page-link" onClick={() => handlePageChange(index + 1)}>
+                        {index + 1}
+                    </button>
+                    </li>
+                ))}
+                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button className="page-link" onClick={() => handlePageChange(currentPage + 1)} aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    </button>
+                </li>
+                </ul>
+            </nav>
 
         </Container>
     );
