@@ -43,8 +43,8 @@ const Register = ({ changeAuthMode, setShow }) => {
 
   const handleRegister = async (event) => {
     event.preventDefault();
-
     const form = event.currentTarget;
+
     if (form.checkValidity() === false) {
       event.stopPropagation();
       setValidated(true);
@@ -52,7 +52,7 @@ const Register = ({ changeAuthMode, setShow }) => {
     }
 
     if (!validatePassword(password)) {
-      setPasswordError('Password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
+      setPasswordError('Password must be 8-12 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
       return;
     } else {
       setPasswordError('');
@@ -77,7 +77,7 @@ const Register = ({ changeAuthMode, setShow }) => {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
     return passwordRegex.test(password);
   };
 
@@ -97,7 +97,7 @@ const Register = ({ changeAuthMode, setShow }) => {
                 type="text"
                 placeholder=""
                 value={username}
-                onChange={(username) => setUsername(username.target.value)}
+                onChange={(username) => setUsername(username.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
                 required
             />
             <label htmlFor="username">Username</label>
@@ -111,7 +111,7 @@ const Register = ({ changeAuthMode, setShow }) => {
                 type="text"
                 placeholder=""
                 value={name}
-                onChange={(name) => setName(name.target.value)}
+                onChange={(name) => setName(name.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                 required
             />
             <label htmlFor="name">Name</label>
@@ -125,7 +125,7 @@ const Register = ({ changeAuthMode, setShow }) => {
                 type="text"
                 placeholder=""
                 value={surname}
-                onChange={(surname) => setSurname(surname.target.value)}
+                onChange={(surname) =>setSurname(surname.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                 required
             />
             <label htmlFor="surname">Surname</label>

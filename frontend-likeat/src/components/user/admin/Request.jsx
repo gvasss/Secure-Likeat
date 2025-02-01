@@ -109,6 +109,13 @@ const Request = () => {
                     />
                 </Form>
 
+                {currentRequests.length === 0 ? (
+                    <div className="col">
+                        <div className="alert alert-warning" role="alert">
+                            No requests found.
+                        </div>
+                    </div>
+                ) : (
                 <Table striped bordered hover responsive>
                     <thead className="table-dark">
                         <tr>
@@ -145,6 +152,7 @@ const Request = () => {
                         ))}
                     </tbody>
                 </Table>
+                )}
 
                 <nav aria-label="Page navigation example">
                     <ul className="pagination justify-content-center pagination-dark">

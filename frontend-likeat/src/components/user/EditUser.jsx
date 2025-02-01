@@ -50,7 +50,17 @@ const EditUser = () => {
   };
 
   const onInputChange = (e) => {
-    setUserData({ ...userData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+  let filteredValue = value;
+  
+  if (name === "name" || name === "surname") {
+    filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+  } else if (name === "email") {
+    filteredValue = value.replace(/[^a-zA-Z0-9@._-]/g, '');
+  }
+
+  setUserData({ ...userData, [name]: filteredValue });
   };
 
   if (loading) {

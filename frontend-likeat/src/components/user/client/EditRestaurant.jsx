@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Button, Spinner, Container, Carousel } from 'react-bootstrap';
+import { Form, Button, Spinner, Container, Carousel, Alert } from 'react-bootstrap';
 import { getRestaurant, updateRestaurant } from '../../../services/restaurants';
 import { deletePhoto, addPhoto } from '../../../services/photos';
 
@@ -28,6 +28,7 @@ const EditRestaurant = () => {
     const [validated, setValidated] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [phoneError, setPhoneError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,8 +37,8 @@ const EditRestaurant = () => {
 
     const fetchRestaurant = async () => {
         try {
-            const restautantData = await getRestaurant(id);
-            setRestaurant(restautantData);
+            const restaurantData = await getRestaurant(id);
+            setRestaurant(restaurantData);
             setLoading(false);
         } catch {
             setError('Failed to load restaurant data.');
@@ -60,6 +61,13 @@ const EditRestaurant = () => {
             e.stopPropagation();
             setValidated(true);
             return;
+        }
+
+        if (!validatePhone(restaurant.phone)) {
+            setPhoneError('Please enter a valid phone number.');
+            return;
+        } else {
+            setPhoneError('');
         }
 
         try {
@@ -95,7 +103,32 @@ const EditRestaurant = () => {
     };
 
     const onInputChange = (e) => {
-        setRestaurant({ ...restaurant, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+    
+        let filteredValue = value;
+    
+        if (name === "name") {
+            filteredValue = value.replace(/[^a-zA-Z0-9\s]/g, '');
+        } else if (name === "address" || name === "information") {
+            filteredValue = value.replace(/[^a-zA-Z0-9\s,.&-]/g, '');
+        } else if (name === "style") {
+            filteredValue = value.replace(/[^a-zA-Z\s,-]/g, '');
+        } else if (name === "cuisine") {
+            filteredValue = value.replace(/[^a-zA-Z\s,-]/g, '');
+        } else if (name === "phone") {
+            filteredValue = value.replace(/[^0-9]/g, '');
+        } else if (name === "openingHours") {
+            filteredValue = value.replace(/[^a-zA-Z0-9\s,.:-]/g, '');
+        } else if (name === "location") {
+            filteredValue = value.replace(/[^a-zA-Z\s]/g, '');
+        }
+    
+        setRestaurant({ ...restaurant, [name]: filteredValue });
+    };
+
+    const validatePhone = (phone) => {
+        const phoneRegex = /^[0-9]{10}$/;
+        return phoneRegex.test(phone);
     };
 
     const imageStyle = {
@@ -308,6 +341,7 @@ const EditRestaurant = () => {
                         <Form.Control type="file" multiple name="additionalImages" onChange={onAdditionalImagesChange} />
                     </Form.Group>
 
+                    {phoneError && <Alert variant="danger">{phoneError}</Alert>}
                     {error && <p className="alert alert-danger">{error}</p>}
                     <Button variant="danger" onClick={() => window.history.back()}>Cancel</Button>{' '}
                     <Button variant="btn btn-dark" type="submit" >Submit</Button>

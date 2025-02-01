@@ -63,6 +63,14 @@ const Profile = () => {
   };
 
   const handlePasswordSubmit = async () => {
+
+    if (!validatePassword(newPassword)) {
+      setPasswordError('Password must be 8-12 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
+      return;
+    } else {
+      setPasswordError('');
+    }
+
     if (newPassword !== confirmationPassword) {
       setPasswordError('Passwords do not match');
       return;
@@ -87,6 +95,11 @@ const Profile = () => {
     } catch {
       setPasswordError('Failed to change password');
     }
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
+    return passwordRegex.test(password);
   };
 
   const handleModalClose = () => {

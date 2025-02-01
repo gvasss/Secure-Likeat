@@ -67,7 +67,7 @@ const Login = ({ changeAuthMode, setShow }) => {
           type="text"
           placeholder=""
           value={username}
-          onChange={(username) => setUsername(username.target.value)}
+          onChange={(username) =>setUsername(username.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
           required
         />
         <label htmlFor="username">Username</label>

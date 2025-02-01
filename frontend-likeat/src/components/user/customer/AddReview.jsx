@@ -112,7 +112,7 @@ const AddReview = () => {
               <label htmlFor="description">Description</label>
               <Form.Control.Feedback type="invalid">
                 Please enter a description.
-              </Form.Control.Feedback>    
+              </Form.Control.Feedback>
             </Form.Floating>
             {error && <p className="alert alert-danger">{error}</p>}
             <Button variant="danger" onClick={() => window.history.back()}>Cancel</Button>{' '}

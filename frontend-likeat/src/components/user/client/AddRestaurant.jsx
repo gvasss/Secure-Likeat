@@ -79,7 +79,7 @@ export default function AddRestaurant() {
               type="text"
               placeholder=""
               value={name}
-              onChange={(name) => setName(name.target.value)}
+              onChange={(name) => setName(name.target.value.replace(/[^a-zA-Z0-9\s]/g, ''))}
               required
             />
             <label htmlFor="name">Name</label>
@@ -93,7 +93,7 @@ export default function AddRestaurant() {
               type="text"
               placeholder=""
               value={address}
-              onChange={(address) => setAddress(address.target.value)}
+              onChange={(address) => setAddress(address.target.value.replace(/[^a-zA-Z0-9\s,.&-]/g, ''))}
               required
             />
             <label htmlFor="address">Address</label>
@@ -107,7 +107,7 @@ export default function AddRestaurant() {
               type="text"
               placeholder=""
               value={style}
-              onChange={(style) => setStyle(style.target.value)}
+              onChange={(style) => setStyle(style.target.value.replace(/[^a-zA-Z\s,-]/g, ''))}
               required
             />
             <label htmlFor="style">Style</label>
@@ -121,7 +121,7 @@ export default function AddRestaurant() {
               type="text"
               placeholder=""
               value={cuisine}
-              onChange={(cuisine) => setCuisine(cuisine.target.value)}
+              onChange={(cuisine) => setCuisine(cuisine.target.value.replace(/[^a-zA-Z\s,-]/g, ''))}
               required
             />
             <label htmlFor="cuisine">Cuisine</label>
@@ -166,7 +166,7 @@ export default function AddRestaurant() {
               type="text"
               placeholder=""
               value={phone}
-              onChange={(phone) => setPhone(phone.target.value)}
+              onChange={(phone) => setPhone(phone.target.value.replace(/[^0-9]/g, ''))}
               required
             />
             <label htmlFor="phone">Phone</label>
@@ -181,7 +181,7 @@ export default function AddRestaurant() {
               type="text"
               placeholder=""
               value={openingHours}
-              onChange={(openingHours) => setOpeningHours(openingHours.target.value)}
+              onChange={(openingHours) => setOpeningHours(openingHours.target.value.replace(/[^a-zA-Z0-9\s,.:-]/g, ''))}
               required
             />
             <label htmlFor="openingHours">Opening Hours</label>
@@ -196,7 +196,7 @@ export default function AddRestaurant() {
               placeholder=""
               name="location"
               value={location}
-              onChange={(location) => setLocation(location.target.value)}
+              onChange={(location) => setLocation(location.target.value.replace(/[^a-zA-Z\s]/g, ''))}
               required
             />
             <label htmlFor="location">Location</label>

@@ -10,6 +10,7 @@ const AddAdmin = () => {
   const [email, setEmail] = useState('');
   const [role] = useState('ADMIN');
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   const { register } = authentication;
   
@@ -38,6 +39,13 @@ const AddAdmin = () => {
       return;
     }
 
+    if (!validatePassword(password)) {
+      setPasswordError('Password must be 8-12 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
+      return;
+    } else {
+      setPasswordError('');
+    }
+
     try {
       const user = { username, password, name, surname, email, role }
       await register(user);
@@ -47,6 +55,11 @@ const AddAdmin = () => {
       console.error('Registration failed:');
       setError(error.response ? error.response.data : error.message);
     }
+  };
+
+  const validatePassword = (password) => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/;
+    return passwordRegex.test(password);
   };
 
   return (
@@ -62,7 +75,7 @@ const AddAdmin = () => {
               type="text"
               placeholder=""
               value={username}
-              onChange={(username) => setUsername(username.target.value)}
+              onChange={(username) => setUsername(username.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
               required
             />
             <label htmlFor="username">Username</label>
@@ -76,7 +89,7 @@ const AddAdmin = () => {
               type="text"
               placeholder=""
               value={name}
-              onChange={(name) => setName(name.target.value)}
+              onChange={(name) => setName(name.target.value.replace(/[^a-zA-Z\s]/g, ''))}
               required
             />
             <label htmlFor="name">Name</label>
@@ -90,7 +103,7 @@ const AddAdmin = () => {
               type="text"
               placeholder=""
               value={surname}
-              onChange={(surname) => setSurname(surname.target.value)}
+              onChange={(surname) => setSurname(surname.target.value.replace(/[^a-zA-Z\s]/g, ''))}
               required
             />
             <label htmlFor="surname">Surname</label>
@@ -139,6 +152,7 @@ const AddAdmin = () => {
               Please enter a valid email address.
             </Form.Control.Feedback>
           </Form.Floating>
+          {passwordError && <Alert variant="danger">{passwordError}</Alert>}
           {error && <p className="alert alert-danger">{error}</p>}
           <Button variant="danger" onClick={() => window.history.back()}>Cancel</Button>{' '}
           <Button type="submit" className="btn btn-dark">Submit</Button>
